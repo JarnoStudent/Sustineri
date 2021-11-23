@@ -15,6 +15,7 @@ namespace Sustineri_Verdieping
         public Sustineri()
         {
             InitializeComponent();
+            MessageBox.Show("dkjfdsakj;fdsakj;fdsa;kfdas");
         }
     }
 }
