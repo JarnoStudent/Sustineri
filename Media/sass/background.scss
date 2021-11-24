@@ -1,0 +1,184 @@
+.background {
+  width: 100vw;
+  height: 100vh;
+  //background-color: red;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: -10;
+  //filter: blur(6rem);
+
+  .dot1 {
+    width: 54rem;
+    height: 60rem;
+    background-color: $color-blue;
+    border-radius: 50%;
+    position: absolute;
+    right: -50rem;
+    bottom: -10rem;
+    animation-name: dotMovement1;
+    animation-duration: 8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    filter: blur(6rem);
+    z-index: -2;
+  }
+
+  .dot2 {
+    width: 55rem;
+    height: 55rem;
+    background-color: $color-green;
+    border-radius: 50%;
+    position: absolute;
+    right: -48rem;
+    bottom: -20rem;
+    animation-name: dotMovement2;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    filter: blur(7rem);
+    z-index: -1;
+  }
+
+  .dot3 {
+    width: 20rem;
+    height: 60rem;
+    background-color: $color-blue;
+    border-radius: 50%;
+    position: absolute;
+    top: -48rem;
+    left: -20rem;
+    animation-name: dotMovement3;
+    animation-duration: 8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    filter: blur(4rem);
+    z-index: -1;
+  }
+
+  .dot4 {
+    width: 20rem;
+    height: 20rem;
+    background-color: $color-green;
+    border-radius: 50%;
+    position: absolute;
+    top: 2rem;
+    left: -20rem;
+    animation-name: dotMovement4;
+    animation-duration: 8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    filter: blur(4rem);
+    z-index: -1;
+  }
+  
+  @keyframes dotMovement1 {
+    0% {
+      right: -50rem;
+      bottom: -10rem;
+    }
+    20% {
+      right: -46rem;
+      bottom: -8rem;
+    }
+    40% {
+      right: -43rem;
+      bottom: -7rem;
+    }
+    60% {
+      right: -44rem;
+      bottom: -10rem;
+    }
+    80% {
+      right: -47rem;
+      bottom: -12rem;
+    }
+    100% {
+      right: -50rem;
+      bottom: -10rem;
+    }
+  }
+
+  @keyframes dotMovement2 {
+    0% {
+      right: -48rem;
+      bottom: -20rem;
+    }
+    20% {
+      right: -50rem;
+      bottom: -15rem;
+    }
+    40% {
+      right: -43rem;
+      bottom: -17rem;
+    }
+    60% {
+      right: -38rem;
+      bottom: -21rem;
+    }
+    80% {
+      right: -47rem;
+      bottom: -23rem;
+    }
+    100% {
+      right: -48rem;
+      bottom: -20rem;
+    }
+  }
+
+  @keyframes dotMovement3 {
+    0% {
+      top: -48rem;
+      left: -20rem;
+    }
+    20% {
+      top: -50rem;
+      left: -15rem;
+    }
+    40% {
+      top: -43rem;
+      left: -17rem;
+    }
+    60% {
+      top: -38rem;
+      left: -21rem;
+    }
+    80% {
+      top: -47rem;
+      left: -23rem;
+    }
+    100% {
+      top: -48rem;
+      left: -20rem;
+    }
+  }
+
+  @keyframes dotMovement4 {
+    0% {
+      top: 2rem;
+      left: -20rem;
+    }
+    20% {
+      top: 4rem;
+      left: -23rem;
+    }
+    40% {
+      top: 5rem;
+      left: -20rem;
+    }
+    60% {
+      top: 3rem;
+      left: -19rem;
+    }
+    80% {
+      top: 1rem;
+      left: -22rem;
+    }
+    100% {
+      top: 2rem;
+      left: -20rem;
+    }
+  }
+
+}

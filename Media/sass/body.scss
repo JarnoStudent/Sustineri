@@ -1,0 +1,15 @@
+/*Text Selection Code*/
+
+*::-moz-selection {
+  background-color: rgba(6,142,200,0.6);
+}
+*::selection {
+  background-color: rgba(6,142,200,0.6);
+}
+
+
+body {
+  margin: 0 auto;
+  font-family: $font-default;
+  color: $color-dark;
+}

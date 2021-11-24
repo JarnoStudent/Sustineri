@@ -1,0 +1,150 @@
+footer {
+  width: 100%;
+  background-color: rgba(255,255,255,0.8);
+  backdrop-filter: blur(.8rem);
+  box-shadow: 0 0 1rem rgba(0,0,0,0.1);
+  color: $color-dark;
+  margin-top: 2rem;
+
+  .footer-top {
+    padding: 2rem 0;
+
+    .col-info {
+      position: relative;
+
+      img {
+        width: 20%;
+        display: inline-block;
+        user-select: none;
+      }
+
+      .info {
+        margin-left: 1rem;
+        display: inline-block;
+        text-align: left;
+        position: absolute;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+
+        p {
+          margin-bottom: 0;
+        }
+
+      }
+
+    }
+
+    .col-names {
+      font-size: .8rem;
+      text-align: center;
+
+      .v-align {
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+      }
+
+    }
+
+    .col-menu {
+      text-align: right;
+
+      .v-align {
+        position: absolute;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+        right: 0;
+
+        ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+
+          li {
+
+            span {
+              text-decoration: none;
+              color: $color-dark;
+              cursor: pointer;
+              transition: .3s;
+
+              &:hover {
+                color: $color-blue;
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+  .footer-bottom {
+    background-color: $color-blue;
+    color: $color-white;
+    font-size: .9rem;
+    text-align: center;
+    padding: .5rem 0;
+  }
+
+}
+
+@media only screen and (max-width: 767px) {
+
+  footer {
+
+    .footer-top {
+
+      .col-info {
+        text-align: center;
+
+        img {
+          margin-left: -50%;
+        }
+
+      }
+
+      .col-names {
+        font-size: 1rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+
+        .v-align {
+          position: relative;
+        }
+
+      }
+
+      .col-menu {
+        text-align: center;
+
+        .v-align {
+          position: relative;
+        }
+
+      }
+
+    }
+
+  }
+
+}
