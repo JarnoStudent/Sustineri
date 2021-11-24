@@ -4,8 +4,8 @@
   define("DB_USERNAME", "root");
   define("DB_PASSWORD", "");
 
-  /*define("DB_HOSTNAME", "db.casheynen.nl");
-  define("DB_NAME", "md404631db493705");
-  define("DB_USERNAME", "md404631db493705");
-  define("DB_PASSWORD", "");*/
+  /*define("DB_HOSTNAME", "192.168.161.80");
+  define("DB_NAME", "sustineri");
+  define("DB_USERNAME", "Cas");
+  define("DB_PASSWORD", "aBCWZfpQRYMn");*/
 ?>
