@@ -15,7 +15,12 @@ namespace Sustineri_Verdieping
         public Sustineri()
         {
             InitializeComponent();
-            MessageBox.Show("dkjfdsakj;fdsakj;fdsa;kfdas");
+            this.Shown += new EventHandler(ShowLabelTest);
+        }
+        private void ShowLabelTest(object sender, EventArgs e)
+        {
+            Controls ctrl = new Controls(new Point(50, 0), new Size(100, panel2.Height), panel2, "lbl");
+            Label lbl =  ctrl.CreateLabel(text: "TestingLabel",color:Color.Red);
         }
     }
 }
