@@ -55,6 +55,7 @@ namespace Sustineri_Verdieping
             if (color != Color.White) label.ForeColor = Color.White;
 
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, label);
+            label.BringToFront();
 
             return label;
         }
@@ -123,6 +124,7 @@ namespace Sustineri_Verdieping
 
             numBox.BorderStyle = BorderStyle.FixedSingle;
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, numBox);
+            numBox.BringToFront();
 
             return numBox;
         }
@@ -152,6 +154,7 @@ namespace Sustineri_Verdieping
             if (isPassword) txtBox.PasswordChar = '•';
 
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, txtBox);
+            txtBox.BringToFront();
 
             return txtBox;
         }
@@ -164,7 +167,7 @@ namespace Sustineri_Verdieping
         /// <param name="sendToBack">Optional, when set to true this object will be send to back</param>
         /// <param name="roundedCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <returns></returns>
-        public PictureBox CreatePicBox(Bitmap image, ImageLayout imgLayout = ImageLayout.Stretch, bool sendToBack = false, int roundedCornerDiameter = 0)
+        public PictureBox CreatePicBox(Bitmap image = null, Color color = new Color(), ImageLayout imgLayout = ImageLayout.Stretch, bool sendToBack = false, int roundedCornerDiameter = 0)
         {
             PictureBox picBox = new PictureBox();
             picBox.Name = name;
@@ -172,15 +175,23 @@ namespace Sustineri_Verdieping
             picBox.Size = ctrlSize;
             picBox.Parent = ctrlParent;
 
-            picBox.BackgroundImage = image;
+            if (color.IsEmpty) color = Color.White;
+            picBox.BackColor = color;
+            if (image != null) picBox.BackgroundImage = image;
             picBox.BackgroundImageLayout = imgLayout;
 
             if (sendToBack) picBox.SendToBack();
+            else picBox.BringToFront();
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, picBox);
 
             return picBox;
         }
 
+        /// <summary>
+        /// Rounds corners of control
+        /// </summary>
+        /// <param name="diameter">diameter of roundness</param>
+        /// <param name="control">control that will be rounded</param>
         private void RoundCorners(int diameter, Control control)
         {
             int quarter = 90;
@@ -188,10 +199,12 @@ namespace Sustineri_Verdieping
             int threeQuarter = 270;
             Rectangle rectangle = new Rectangle(0, 0, control.Width, control.Height);
             System.Drawing.Drawing2D.GraphicsPath graphicsPath = new System.Drawing.Drawing2D.GraphicsPath();
+
             graphicsPath.AddArc(rectangle.X, rectangle.Y, diameter, diameter, half, quarter);
             graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y, diameter, diameter, threeQuarter, quarter);
             graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y + rectangle.Height - diameter, diameter, diameter, 0, quarter);
             graphicsPath.AddArc(rectangle.X, rectangle.Y + rectangle.Height - diameter, diameter, diameter, quarter, quarter);
+
             control.Region = new Region(graphicsPath);
         }
     }

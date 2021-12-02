@@ -88,5 +88,14 @@
   <ItemGroup>
     <None Include="Resources\Cas_sustineri_logo_NoWords.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\backgroundImage.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\signout.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

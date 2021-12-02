@@ -63,6 +63,16 @@ namespace Sustineri_Verdieping.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap backgroundImage {
+            get {
+                object obj = ResourceManager.GetObject("backgroundImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Cas_sustineri_logo {
             get {
                 object obj = ResourceManager.GetObject("Cas_sustineri_logo", resourceCulture);
@@ -76,6 +86,26 @@ namespace Sustineri_Verdieping.Properties {
         internal static System.Drawing.Bitmap Cas_sustineri_logo_NoWords {
             get {
                 object obj = ResourceManager.GetObject("Cas_sustineri_logo_NoWords", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap refresh {
+            get {
+                object obj = ResourceManager.GetObject("refresh", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap signout {
+            get {
+                object obj = ResourceManager.GetObject("signout", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
