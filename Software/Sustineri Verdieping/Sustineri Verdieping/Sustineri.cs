@@ -24,7 +24,7 @@ namespace Sustineri_Verdieping
         Bitmap refreshImage = Properties.Resources.refresh;
         Bitmap logoutImage = Properties.Resources.signout;
         const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
-        const string LOGIN = "Login";
+        const string LOGIN = "Login", LOGOUT = "Logout", REGISTER = "Register";
 
         List<Button> menuMainButtons;
         Label themeBar;
@@ -57,9 +57,9 @@ namespace Sustineri_Verdieping
         private void Toolbar(object sender, EventArgs e)
         {
             int btnwidth = 60;
-            Controls exitBtn = new Controls(new Point(screenWidth - btnwidth, 0), new Size(btnwidth, panel3.Height), panel3, "exit");
+            CreateControls exitBtn = new CreateControls(new Point(screenWidth - btnwidth, 0), new Size(btnwidth, panel3.Height), panel3, "exit");
             exitBtn.CreateButton(CloseApp, "⨉", SustineriFont.H1, color: Color.Red);
-            Controls mimimizeBtn = new Controls(new Point(screenWidth - btnwidth * 3, 0), new Size(btnwidth, panel3.Height), panel3, "minimize");
+            CreateControls mimimizeBtn = new CreateControls(new Point(screenWidth - btnwidth * 3, 0), new Size(btnwidth, panel3.Height), panel3, "minimize");
             mimimizeBtn.CreateButton(MinimizeApp, "—", SustineriFont.H1, color: Color.LightGray);
             LoginPage();
         }
@@ -94,6 +94,14 @@ namespace Sustineri_Verdieping
                 case LOGIN:
                     MenuMain();//add login check later
                     break;
+                case LOGOUT:
+                    panel2.Controls.Clear();
+                    panel2.Visible = false;
+                    LoginPage();
+                    break;
+                case REGISTER:
+                    //RegisterPage();
+                    break;
                     //etc...
             }
         }
@@ -107,21 +115,26 @@ namespace Sustineri_Verdieping
             int btnWidth = screenWidth / 15;
             int borderWidth = 4;
 
-            Controls logo = new Controls(new Point(btnWidth, (panel2.Height - LOGO_SUSTINERI_Y) / 2), new Size(LOGO_SUSTINERI_X, LOGO_SUSTINERI_Y), panel2, "logo");
+            int minBtnWidth = 80;
+            if (btnWidth < minBtnWidth) btnWidth = minBtnWidth;
+
+            CreateControls logo = new CreateControls(new Point(btnWidth, (panel2.Height - LOGO_SUSTINERI_Y) / 2), new Size(LOGO_SUSTINERI_X, LOGO_SUSTINERI_Y), panel2, "logo");
             logo.CreatePicBox(logoSustineri);
 
+            CreateControls logOutBtn = new CreateControls(new Point(panel2.Width - btnWidth, 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, LOGOUT);
+            logOutBtn.CreateButton(PageSwitcher, image: logoutImage);
             menuMainButtons = new List<Button>();
 
             for (int i = 0; i < Enum.GetNames(typeof(Pages)).Count(); i++)
             {
                 string name = Enum.GetName(typeof(Pages), i);
-                Controls btn = new Controls(new Point(panel2.Width - (btnWidth * (i + 1)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
+                CreateControls btn = new CreateControls(new Point(panel2.Width - (btnWidth * (i + 2)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
                 Button button = btn.CreateButton(PageSwitcher, name, SustineriFont.H1);
                 if (button.Name == Pages.Home.ToString()) { button.BackColor = SustineriColor.Blue; button.ForeColor = Color.White; }
                 menuMainButtons.Add(button);
             }
 
-            Controls border = new Controls(new Point(0, panel2.Height - borderWidth), new Size(panel2.Width, borderWidth), panel2);
+            CreateControls border = new CreateControls(new Point(0, panel2.Height - borderWidth), new Size(panel2.Width, borderWidth), panel2);
             themeBar = border.CreateLabel(color: SustineriColor.Blue);
             //add HomePage(); later
         }
@@ -132,7 +145,7 @@ namespace Sustineri_Verdieping
         private void LoginPage()
         {
             int line = 0;
-            int offset = 10;   
+            int lineOffset = 10;
             int fieldWidth = panel1.Width / 3;
             int labelWidth = fieldWidth / 3 * 2;
             int labelHeight = 20;
@@ -140,40 +153,44 @@ namespace Sustineri_Verdieping
             int logoSizeY = LOGO_DROPLET_Y * screenHeight / 1500;
             int labelCenterX = (panel1.Width - labelWidth) / 2;
 
-            Controls loginLabel = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * line)), new Size(labelWidth, labelHeight + 5), panel1);
+            CreateControls loginLabel = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(labelWidth, labelHeight + 5), panel1);
             loginLabel.CreateLabel("Inloggen", SustineriFont.H1);
 
-            Controls namelbl = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * ++line)), new Size(labelWidth, labelHeight), panel1);
+            //name
+            CreateControls namelbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1);
             namelbl.CreateLabel("Naam", textAlignment: ContentAlignment.BottomLeft);
-
-            Controls nameBoxBorder = new Controls(new Point(labelCenterX - 1, panel1.Height / 2 + ((labelHeight + offset) * ++line) - 1), new Size(labelWidth + 2, labelHeight + 2), panel1);
-            nameBoxBorder.CreateLabel(color: Color.Black, roundedCornerDiameter: textboxRoundness);
-            Controls nameBox = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * line)), new Size(labelWidth, labelHeight), panel1, "Name");
+            //name textbox
+            CreateControls nameBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1, "Name");
             nameBox.CreateTextBox(roundedCornerDiameter: textboxRoundness);
+            CreateControls nameBoxBorder = new CreateControls(nameBox.ObjPoint, nameBox.ObjSize, panel1);
+            nameBoxBorder.CreatePicBox(color: Color.Black, sendToBack: true, roundedCornerDiameter: textboxRoundness, bleed: 1);
 
-            Controls pwlbl = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * ++line)), new Size(labelWidth, labelHeight), panel1);
+            //password
+            CreateControls pwlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1);
             pwlbl.CreateLabel("Wachtwoord", textAlignment: ContentAlignment.BottomLeft);
-
-            Controls pwBoxBorder = new Controls(new Point(labelCenterX - 1, panel1.Height / 2 + ((labelHeight + offset) * ++line) - 1), new Size(labelWidth + 2, labelHeight + 2), panel1);
-            pwBoxBorder.CreateLabel(color: Color.Black, roundedCornerDiameter: textboxRoundness);
-            Controls pwBox = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * line)), new Size(labelWidth, labelHeight), panel1, "Password");
+            //passwordtextbox
+            CreateControls pwBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1, "Password");
             pwBox.CreateTextBox(isPassword: true, roundedCornerDiameter: textboxRoundness);
+            CreateControls pwBoxBorder = new CreateControls(pwBox.ObjPoint, pwBox.ObjSize, panel1);
+            pwBoxBorder.CreatePicBox(color: Color.Black, sendToBack: true, roundedCornerDiameter: textboxRoundness, bleed: 1);
 
+            //buttons
             int btnWidth = labelWidth / 5 * 2;
-            Controls loginBtn = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * ++line) + offset), new Size(btnWidth, labelHeight * 2), panel1, LOGIN);
-            loginBtn.CreateButton(PageSwitcher, LOGIN, color: SustineriColor.Blue, roundedCornerDiameter: textboxRoundness);
-            Controls registerBtn = new Controls(new Point(labelCenterX + labelWidth - btnWidth, panel1.Height / 2 + ((labelHeight + offset) * line) + offset), new Size(btnWidth, labelHeight * 2), panel1, "Register");
-            registerBtn.CreateButton(PageSwitcher, "Registreren", color: SustineriColor.Blue, roundedCornerDiameter: textboxRoundness);
+            CreateControls loginBtn = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line) + labelHeight), new Size(btnWidth, labelHeight * 2), panel1, LOGIN);
+            loginBtn.CreateButton(PageSwitcher, LOGIN, color: SustineriColor.Blue, roundCornerDiameter: textboxRoundness);
+            CreateControls registerBtn = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, loginBtn.ObjPoint.Y), new Size(btnWidth, labelHeight * 2), panel1, REGISTER);
+            registerBtn.CreateButton(PageSwitcher, "Registreren", color: SustineriColor.Blue, roundCornerDiameter: textboxRoundness);
 
-            int fieldHeight = logoSizeY * 2 + (labelHeight + offset) * line;
+            //visual appearance
+            int fieldHeight = registerBtn.ObjPoint.Y;
 
-            Controls logo = new Controls(new Point((panel1.Width - logoSizeX) / 2, panel1.Height / 2 - logoSizeY / 6 * 7), new Size(logoSizeX, logoSizeY), panel1, "logo");
+            CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, panel1.Height / 2 - logoSizeY / 6 * 7), new Size(logoSizeX, logoSizeY), panel1, "logo");
             logo.CreatePicBox(logoDroplet);
 
-            Controls colorField = new Controls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight), panel1, "background");
+            CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight), panel1, "background");
             colorField.CreatePicBox(color: Color.White, sendToBack: true, roundedCornerDiameter: standardRoundingDiameter);
 
-            Controls background = new Controls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
+            CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
             background.CreatePicBox(backgroundImage, sendToBack: true);
         }
 

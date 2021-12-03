@@ -10,11 +10,38 @@ namespace Sustineri_Verdieping
     /// </summary>
     public class Controls
     {
-        private Point ctrlPoint;
-        private Size ctrlSize;
-        public Control ctrlParent;
-        private string name;
+        public Point ObjPoint { get; protected set; }
+        public Size ObjSize { get; protected set; }
+        public Control ObjParent { get; protected set; }
+        public string ObjName { get; protected set; }
+        
 
+        /// <summary>
+        /// Rounds corners of control
+        /// </summary>
+        /// <param name="diameter">diameter of roundness</param>
+        /// <param name="control">control that will be rounded</param>
+        protected void RoundCorners(int diameter, Control control)
+        {
+            int quarter = 90;
+            int half = 180;
+            int threeQuarter = 270;
+            Rectangle rectangle = new Rectangle(0, 0, control.Width, control.Height);
+            System.Drawing.Drawing2D.GraphicsPath graphicsPath = new System.Drawing.Drawing2D.GraphicsPath();
+
+            graphicsPath.AddArc(rectangle.X, rectangle.Y, diameter, diameter, half, quarter);
+            graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y, diameter, diameter, threeQuarter, quarter);
+            graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y + rectangle.Height - diameter, diameter, diameter, 0, quarter);
+            graphicsPath.AddArc(rectangle.X, rectangle.Y + rectangle.Height - diameter, diameter, diameter, quarter, quarter);
+
+            control.Region = new Region(graphicsPath);
+        }
+    }
+
+
+    public class CreateControls : Controls
+    {
+        private Control ctrl = null;
         /// <summary>
         /// Objects available: Label, Button, NumericUpDown, TextBox, PictureBox
         /// </summary>
@@ -22,12 +49,12 @@ namespace Sustineri_Verdieping
         /// <param name="size">Required, sets size in pixels of the object, NumericUpDown does not use the y size you set to it</param>
         /// <param name="parent">Required, the object set to this will become the parent of the object</param>
         /// <param name="controlName">Optional, sets the name of the object</param>
-        public Controls(Point point, Size size, Control parent, string controlName = "")
+        public CreateControls(Point point, Size size, Control parent, string controlName = "")
         {
-            ctrlPoint = point;
-            ctrlSize = size;
-            ctrlParent = parent;
-            name = controlName;
+            ObjPoint = point;
+            ObjSize = size;
+            ObjParent = parent;
+            ObjName = controlName;
         }
         /// <summary>
         /// Creates a Label.
@@ -41,10 +68,10 @@ namespace Sustineri_Verdieping
         public Label CreateLabel(string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundedCornerDiameter = 0)
         {
             Label label = new Label();
-            label.Name = name;
-            label.Location = ctrlPoint;
-            label.Size = ctrlSize;
-            label.Parent = ctrlParent;
+            label.Name = ObjName;
+            label.Location = ObjPoint;
+            label.Size = ObjSize;
+            label.Parent = ObjParent;
 
             label.Text = text;
             label.TextAlign = textAlignment;
@@ -56,6 +83,7 @@ namespace Sustineri_Verdieping
 
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, label);
             label.BringToFront();
+            ctrl = label;
 
             return label;
         }
@@ -69,15 +97,15 @@ namespace Sustineri_Verdieping
         /// <param name="font">Optional, sets the font of the text within this object</param>
         /// <param name="textAlignment">Optional, sets alignment of text within this object</param>
         /// <param name="color">Optional, sets background color of this object and if it is white or empty, text color will be white</param>
-        /// <param name="roundedCornerDiameter">Optional, sets diameter of rounded corners</param>
+        /// <param name="roundCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <returns></returns>
-        public Button CreateButton(EventHandler eHandler, string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundedCornerDiameter = 0)
+        public Button CreateButton(EventHandler eHandler, string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundCornerDiameter = 0, Bitmap image = null)
         {
             Button btn = new Button();
-            btn.Name = name;
-            btn.Location = ctrlPoint;
-            btn.Size = ctrlSize;
-            btn.Parent = ctrlParent;
+            btn.Name = ObjName;
+            btn.Location = ObjPoint;
+            btn.Size = ObjSize;
+            btn.Parent = ObjParent;
 
             btn.Text = text;
             btn.TextAlign = textAlignment;
@@ -85,14 +113,18 @@ namespace Sustineri_Verdieping
             else btn.Font = SustineriFont.TextFont;
             if (color.IsEmpty) color = Color.White;
             btn.BackColor = color;
-            if (color != Color.White) btn.ForeColor = Color.White;
+            if (color != Color.White || image != null) btn.ForeColor = Color.White;
+            if (image != null) btn.BackgroundImage = image;
+            btn.BackgroundImageLayout = ImageLayout.Zoom;
+            btn.Cursor = Cursors.Hand;
 
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.Click += new EventHandler(eHandler);
             btn.BringToFront();
 
-            if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, btn);
+            if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, btn);
+            ctrl = btn;
 
             return btn;
         }
@@ -108,10 +140,10 @@ namespace Sustineri_Verdieping
         public NumericUpDown CreateNumBox(int min, int max, Font font = null, Color color = new Color(), int roundedCornerDiameter = 0)
         {
             NumericUpDown numBox = new NumericUpDown();
-            numBox.Name = name;
-            numBox.Location = ctrlPoint;
-            numBox.Size = ctrlSize;
-            numBox.Parent = ctrlParent;
+            numBox.Name = ObjName;
+            numBox.Location = ObjPoint;
+            numBox.Size = ObjSize;
+            numBox.Parent = ObjParent;
 
             numBox.Minimum = min;
             numBox.Maximum = max;
@@ -125,6 +157,7 @@ namespace Sustineri_Verdieping
             numBox.BorderStyle = BorderStyle.FixedSingle;
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, numBox);
             numBox.BringToFront();
+            ctrl = numBox;
 
             return numBox;
         }
@@ -139,14 +172,14 @@ namespace Sustineri_Verdieping
         public TextBox CreateTextBox(Font font = null, bool isPassword = false, Color color = new Color(), int roundedCornerDiameter = 0)
         {
             TextBox txtBox = new TextBox();
-            txtBox.Name = name;
-            txtBox.Location = ctrlPoint;
-            txtBox.Size = ctrlSize;
-            txtBox.Parent = ctrlParent;
+            txtBox.Name = ObjName;
+            txtBox.Location = ObjPoint;
+            txtBox.Size = ObjSize;
+            txtBox.Parent = ObjParent;
 
             if (font != null) txtBox.Font = font;
             else txtBox.Font = SustineriFont.TextFont;
-            txtBox.MinimumSize = ctrlSize;
+            txtBox.MinimumSize = ObjSize;
             if (color.IsEmpty) color = Color.White;
             txtBox.BackColor = color;
 
@@ -155,6 +188,7 @@ namespace Sustineri_Verdieping
 
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, txtBox);
             txtBox.BringToFront();
+            ctrl = txtBox;
 
             return txtBox;
         }
@@ -167,13 +201,13 @@ namespace Sustineri_Verdieping
         /// <param name="sendToBack">Optional, when set to true this object will be send to back</param>
         /// <param name="roundedCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <returns></returns>
-        public PictureBox CreatePicBox(Bitmap image = null, Color color = new Color(), ImageLayout imgLayout = ImageLayout.Stretch, bool sendToBack = false, int roundedCornerDiameter = 0)
+        public PictureBox CreatePicBox(Bitmap image = null, Color color = new Color(), ImageLayout imgLayout = ImageLayout.Stretch, bool sendToBack = false, int roundedCornerDiameter = 0, int bleed = 0)
         {
             PictureBox picBox = new PictureBox();
-            picBox.Name = name;
-            picBox.Location = ctrlPoint;
-            picBox.Size = ctrlSize;
-            picBox.Parent = ctrlParent;
+            picBox.Name = ObjName;
+            picBox.Location = new Point(ObjPoint.X - bleed, ObjPoint.Y - bleed);
+            picBox.Size = new Size(ObjSize.Width + bleed * 2, ObjSize.Height + bleed * 2);
+            picBox.Parent = ObjParent;
 
             if (color.IsEmpty) color = Color.White;
             picBox.BackColor = color;
@@ -183,29 +217,10 @@ namespace Sustineri_Verdieping
             if (sendToBack) picBox.SendToBack();
             else picBox.BringToFront();
             if (roundedCornerDiameter > 0) RoundCorners(roundedCornerDiameter, picBox);
+            ctrl = picBox;
 
             return picBox;
         }
 
-        /// <summary>
-        /// Rounds corners of control
-        /// </summary>
-        /// <param name="diameter">diameter of roundness</param>
-        /// <param name="control">control that will be rounded</param>
-        private void RoundCorners(int diameter, Control control)
-        {
-            int quarter = 90;
-            int half = 180;
-            int threeQuarter = 270;
-            Rectangle rectangle = new Rectangle(0, 0, control.Width, control.Height);
-            System.Drawing.Drawing2D.GraphicsPath graphicsPath = new System.Drawing.Drawing2D.GraphicsPath();
-
-            graphicsPath.AddArc(rectangle.X, rectangle.Y, diameter, diameter, half, quarter);
-            graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y, diameter, diameter, threeQuarter, quarter);
-            graphicsPath.AddArc(rectangle.X + rectangle.Width - diameter, rectangle.Y + rectangle.Height - diameter, diameter, diameter, 0, quarter);
-            graphicsPath.AddArc(rectangle.X, rectangle.Y + rectangle.Height - diameter, diameter, diameter, quarter, quarter);
-
-            control.Region = new Region(graphicsPath);
-        }
     }
 }
