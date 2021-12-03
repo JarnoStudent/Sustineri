@@ -15,7 +15,8 @@ namespace Sustineri_Verdieping
         public int screenWidth = 0;
         public int screenHeight = 0;
 
-        private int standardRoundingDiameter = 10;
+        private int standardRoundingDiameter = 20;
+        private int textboxRoundness = 8;
 
         Bitmap logoSustineri = Properties.Resources.Cas_sustineri_logo;
         Bitmap logoDroplet = Properties.Resources.Cas_sustineri_logo_NoWords;
@@ -131,8 +132,7 @@ namespace Sustineri_Verdieping
         private void LoginPage()
         {
             int line = 0;
-            int offset = 10;
-            int textboxRoundness = 8;
+            int offset = 10;   
             int fieldWidth = panel1.Width / 3;
             int labelWidth = fieldWidth / 3 * 2;
             int labelHeight = 20;
@@ -157,7 +157,7 @@ namespace Sustineri_Verdieping
             Controls pwBoxBorder = new Controls(new Point(labelCenterX - 1, panel1.Height / 2 + ((labelHeight + offset) * ++line) - 1), new Size(labelWidth + 2, labelHeight + 2), panel1);
             pwBoxBorder.CreateLabel(color: Color.Black, roundedCornerDiameter: textboxRoundness);
             Controls pwBox = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * line)), new Size(labelWidth, labelHeight), panel1, "Password");
-            pwBox.CreateTextBox(roundedCornerDiameter: textboxRoundness);
+            pwBox.CreateTextBox(isPassword: true, roundedCornerDiameter: textboxRoundness);
 
             int btnWidth = labelWidth / 5 * 2;
             Controls loginBtn = new Controls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + offset) * ++line) + offset), new Size(btnWidth, labelHeight * 2), panel1, LOGIN);
@@ -171,7 +171,7 @@ namespace Sustineri_Verdieping
             logo.CreatePicBox(logoDroplet);
 
             Controls colorField = new Controls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight), panel1, "background");
-            colorField.CreatePicBox(color: Color.White, sendToBack: true, roundedCornerDiameter: 20);
+            colorField.CreatePicBox(color: Color.White, sendToBack: true, roundedCornerDiameter: standardRoundingDiameter);
 
             Controls background = new Controls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
             background.CreatePicBox(backgroundImage, sendToBack: true);
