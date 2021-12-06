@@ -24,7 +24,7 @@ namespace Sustineri_Verdieping
         Bitmap refreshImage = Properties.Resources.refresh;
         Bitmap logoutImage = Properties.Resources.signout;
         const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
-        const string LOGIN = "Login", LOGOUT = "Logout", REGISTER = "Register";
+        const string LOGIN = "Login", LOGOUT = "Afmelden", REGISTER = "Registreren", BACK = "Terug", CREATEUSER = "CreateUser";
 
         List<Button> menuMainButtons;
         Label themeBar;
@@ -58,9 +58,9 @@ namespace Sustineri_Verdieping
         {
             int btnwidth = 60;
             CreateControls exitBtn = new CreateControls(new Point(screenWidth - btnwidth, 0), new Size(btnwidth, panel3.Height), panel3, "exit");
-            exitBtn.CreateButton(CloseApp, "⨉", SustineriFont.H1, color: Color.Red);
+            exitBtn.CreateButton(CloseApp, "⨉", FontSustineri.H1, color: Color.Red);
             CreateControls mimimizeBtn = new CreateControls(new Point(screenWidth - btnwidth * 3, 0), new Size(btnwidth, panel3.Height), panel3, "minimize");
-            mimimizeBtn.CreateButton(MinimizeApp, "—", SustineriFont.H1, color: Color.LightGray);
+            mimimizeBtn.CreateButton(MinimizeApp, "—", FontSustineri.H1, color: Color.LightGray);
             LoginPage();
         }
 
@@ -77,8 +77,8 @@ namespace Sustineri_Verdieping
                 {
                     if (menuMainButtons[i] == ctrl)
                     {
-                        if (menuMainButtons[i].Name == Pages.Gas.ToString()) { menuMainButtons[i].BackColor = SustineriColor.Green; themeBar.BackColor = SustineriColor.Green; }
-                        else { menuMainButtons[i].BackColor = SustineriColor.Blue; themeBar.BackColor = SustineriColor.Blue; }
+                        if (menuMainButtons[i].Name == Pages.Gas.ToString()) { menuMainButtons[i].BackColor = ColorSustineri.Green; themeBar.BackColor = ColorSustineri.Green; }
+                        else { menuMainButtons[i].BackColor = ColorSustineri.Blue; themeBar.BackColor = ColorSustineri.Blue; }
                         menuMainButtons[i].ForeColor = Color.White;
                     }
                     else
@@ -94,13 +94,18 @@ namespace Sustineri_Verdieping
                 case LOGIN:
                     MenuMain();//add login check later
                     break;
+                case BACK:
                 case LOGOUT:
                     panel2.Controls.Clear();
                     panel2.Visible = false;
                     LoginPage();
                     break;
                 case REGISTER:
-                    //RegisterPage();
+                    LoginPage(true);
+                    break;
+                case CREATEUSER:
+                    //check if user is created and add error or jump to login page depending on result
+                    LoginPage();
                     break;
                     //etc...
             }
@@ -129,20 +134,20 @@ namespace Sustineri_Verdieping
             {
                 string name = Enum.GetName(typeof(Pages), i);
                 CreateControls btn = new CreateControls(new Point(panel2.Width - (btnWidth * (i + 2)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
-                Button button = btn.CreateButton(PageSwitcher, name, SustineriFont.H1);
-                if (button.Name == Pages.Home.ToString()) { button.BackColor = SustineriColor.Blue; button.ForeColor = Color.White; }
+                Button button = btn.CreateButton(PageSwitcher, name, FontSustineri.H1);
+                if (button.Name == Pages.Home.ToString()) { button.BackColor = ColorSustineri.Blue; button.ForeColor = Color.White; }
                 menuMainButtons.Add(button);
             }
 
             CreateControls border = new CreateControls(new Point(0, panel2.Height - borderWidth), new Size(panel2.Width, borderWidth), panel2);
-            themeBar = border.CreateLabel(color: SustineriColor.Blue);
+            themeBar = border.CreateLabel(color: ColorSustineri.Blue);
             //add HomePage(); later
         }
 
         /// <summary>
         /// Creates the login page
         /// </summary>
-        private void LoginPage()
+        private void LoginPage(bool isRegisterPage = false)
         {
             int line = 0;
             int lineOffset = 10;
@@ -152,47 +157,125 @@ namespace Sustineri_Verdieping
             int logoSizeX = LOGO_DROPLET_X * screenHeight / 1500;
             int logoSizeY = LOGO_DROPLET_Y * screenHeight / 1500;
             int labelCenterX = (panel1.Width - labelWidth) / 2;
+            int maxCharLength = 15;
 
-            CreateControls loginLabel = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(labelWidth, labelHeight + 5), panel1);
-            loginLabel.CreateLabel("Inloggen", SustineriFont.H1);
+            string titleText = "Inloggen";
+            string nameText = "Naam";
+            string leftBtnText = LOGIN;
+            string rightBtnText = REGISTER;
+            if (isRegisterPage)
+            {
+                titleText = "Registreren";
+                nameText += $" (max {maxCharLength} karakters)";
+                leftBtnText = BACK;
+                rightBtnText = CREATEUSER;
+            }
+
+            CreateControls title = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(labelWidth, labelHeight + 5), panel1);
+            title.CreateLabel(titleText, FontSustineri.H1);
 
             //name
-            CreateControls namelbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1);
-            namelbl.CreateLabel("Naam", textAlignment: ContentAlignment.BottomLeft);
+            CreateControls namelbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
+            namelbl.CreateLabel(nameText, textAlignment: ContentAlignment.BottomLeft);
             //name textbox
-            CreateControls nameBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1, "Name");
-            nameBox.CreateTextBox(roundedCornerDiameter: textboxRoundness);
-            CreateControls nameBoxBorder = new CreateControls(nameBox.ObjPoint, nameBox.ObjSize, panel1);
-            nameBoxBorder.CreatePicBox(color: Color.Black, sendToBack: true, roundedCornerDiameter: textboxRoundness, bleed: 1);
+            CreateControls nameBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Name");
+            nameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
 
             //password
-            CreateControls pwlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1);
+            CreateControls pwlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
             pwlbl.CreateLabel("Wachtwoord", textAlignment: ContentAlignment.BottomLeft);
             //passwordtextbox
-            CreateControls pwBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), loginLabel.ObjSize, panel1, "Password");
-            pwBox.CreateTextBox(isPassword: true, roundedCornerDiameter: textboxRoundness);
-            CreateControls pwBoxBorder = new CreateControls(pwBox.ObjPoint, pwBox.ObjSize, panel1);
-            pwBoxBorder.CreatePicBox(color: Color.Black, sendToBack: true, roundedCornerDiameter: textboxRoundness, bleed: 1);
+            CreateControls pwBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Password");
+            pwBox.CreateTextBox(isPassword: true, roundCornerDiameter: textboxRoundness);
+
+            int extraPageLength = 0;
+            if (isRegisterPage)
+            {
+                panel1.AutoScroll = true;
+                //passwordConfirmation
+                CreateControls pwConfirmlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
+                pwConfirmlbl.CreateLabel("Wachtwoord Bevestigen", textAlignment: ContentAlignment.BottomLeft);
+                //textbox
+                CreateControls pwConfirmBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Password Confirmation");
+                pwConfirmBox.CreateTextBox(isPassword: true, roundCornerDiameter: textboxRoundness);
+
+                //first name
+                CreateControls firstNameLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
+                firstNameLbl.CreateLabel($"Voornaam (max {maxCharLength} karakters)", textAlignment: ContentAlignment.BottomLeft);
+                //textbox
+                CreateControls firstNameBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "FirstName");
+                firstNameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
+
+                //insertion & last name labels
+                CreateControls insertionLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
+                insertionLbl.CreateLabel("Tussenvoegsel", textAlignment: ContentAlignment.BottomLeft);
+                CreateControls lastNameLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 5 * 2, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
+                lastNameLbl.CreateLabel($"Achternaam (max {maxCharLength} karakters)", textAlignment: ContentAlignment.BottomLeft);
+                //textboxes
+                CreateControls insertBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), insertionLbl.ObjSize, panel1, "Insertion");
+                insertBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
+                CreateControls lastNameBox = new CreateControls(new Point(lastNameLbl.ObjPoint.X, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), lastNameLbl.ObjSize, panel1, "Insertion");
+                lastNameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
+
+                //e-mail label
+                CreateControls emailLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
+                emailLbl.CreateLabel("e-mail", textAlignment: ContentAlignment.BottomLeft);
+                //textbox
+                CreateControls emailBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "E-mail");
+                emailBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
+
+                //street & house number
+                CreateControls streetLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
+                streetLbl.CreateLabel("Straat", textAlignment: ContentAlignment.BottomLeft);
+                CreateControls houseNumberLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 3 * 2, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
+                houseNumberLbl.CreateLabel("Huisnummer", textAlignment: ContentAlignment.BottomLeft);
+                //textbox
+                CreateControls streetBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), streetLbl.ObjSize, panel1, "Street");
+                streetBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
+                CreateControls houseNumberBox = new CreateControls(new Point(houseNumberLbl.ObjPoint.X, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), houseNumberLbl.ObjSize, panel1, "HouseNumber");
+                houseNumberBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
+
+                //postalcode & city
+                CreateControls postalcodeLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
+                postalcodeLbl.CreateLabel("Postcode", textAlignment: ContentAlignment.BottomLeft);
+                CreateControls cityLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 5 * 2, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
+                cityLbl.CreateLabel("Stad", textAlignment: ContentAlignment.BottomLeft);
+                //textbox
+                CreateControls postalBox = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), postalcodeLbl.ObjSize, panel1, "PostalCode");
+                postalBox.CreateTextBox(maxLength: 4, roundCornerDiameter: textboxRoundness);
+                CreateControls cityBox = new CreateControls(new Point(cityLbl.ObjPoint.X, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), cityLbl.ObjSize, panel1, "City");
+                cityBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
+
+
+                extraPageLength = postalBox.ObjPoint.Y - pwBox.ObjPoint.Y;
+            }
 
             //buttons
             int btnWidth = labelWidth / 5 * 2;
-            CreateControls loginBtn = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line) + labelHeight), new Size(btnWidth, labelHeight * 2), panel1, LOGIN);
-            loginBtn.CreateButton(PageSwitcher, LOGIN, color: SustineriColor.Blue, roundCornerDiameter: textboxRoundness);
-            CreateControls registerBtn = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, loginBtn.ObjPoint.Y), new Size(btnWidth, labelHeight * 2), panel1, REGISTER);
-            registerBtn.CreateButton(PageSwitcher, "Registreren", color: SustineriColor.Blue, roundCornerDiameter: textboxRoundness);
+            CreateControls leftBtn = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line) + labelHeight), new Size(btnWidth, labelHeight * 2), panel1, leftBtnText);
+            leftBtn.CreateButton(PageSwitcher, leftBtnText, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+            CreateControls rightButton = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, leftBtn.ObjPoint.Y), new Size(btnWidth, labelHeight * 2), panel1, rightBtnText);
+            rightButton.CreateButton(PageSwitcher, REGISTER, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
 
             //visual appearance
-            int fieldHeight = registerBtn.ObjPoint.Y;
+            int fieldHeight = pwBox.ObjPoint.Y + rightButton.ObjSize.Height;
 
-            CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, panel1.Height / 2 - logoSizeY / 6 * 7), new Size(logoSizeX, logoSizeY), panel1, "logo");
+            CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, title.ObjPoint.Y - lineOffset * 4 - logoSizeY), new Size(logoSizeX, logoSizeY), panel1, "logo");
             logo.CreatePicBox(logoDroplet);
 
-            CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight), panel1, "background");
-            colorField.CreatePicBox(color: Color.White, sendToBack: true, roundedCornerDiameter: standardRoundingDiameter);
+            CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight + extraPageLength), panel1, "background");
+            colorField.CreatePicBox(color: Color.White, sendToBack: true, roundCornerDiameter: standardRoundingDiameter);
 
             CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
             background.CreatePicBox(backgroundImage, sendToBack: true);
+            if (panel1.VerticalScroll.Visible)
+            {
+                CreateControls backgroundExtended = new CreateControls(new Point(0, panel1.Height), new Size(panel1.Width, colorField.ObjPoint.Y*2), panel1, "background");
+                backgroundExtended.CreatePicBox(color: Color.Black, sendToBack: true);
+            }
         }
+
+
 
         /// <summary>
         /// closes the application
