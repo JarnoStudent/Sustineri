@@ -84,6 +84,43 @@ namespace Sustineri_Verdieping
             ObjParent = parent;
             ObjName = controlName;
         }
+
+        /// <summary>
+        /// Creates a drop down box/menu
+        /// </summary>
+        /// <param name="items">Required, array of items to pick from</param>
+        /// <param name="text">Optional, sets text displayed in this object</param>
+        /// <param name="font">Optional, sets the font of the text within this object</param>
+        /// <param name="color">Optional, sets background color of this object and if it is not white or empty text color will be white</param>
+        /// <param name="roundCornerDiameter">Optional, sets diameter of rounded corners</param>
+        /// <returns></returns>
+        public ComboBox CreateDropDown(string[] items, string text = "", Font font = null, Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
+        {
+            ComboBox dropdown = new ComboBox();
+            dropdown.Name = ObjName;
+            dropdown.Location = ObjPoint;
+            dropdown.Size = ObjSize;
+            dropdown.Parent = ObjParent;
+
+            if (items != null) dropdown.Items.AddRange(items);
+
+            dropdown.Text = text;
+            if (font != null) dropdown.Font = font;
+            else dropdown.Font = FontSustineri.TextFont;
+            if (color.IsEmpty) color = Color.White;
+            dropdown.BackColor = color;
+            if (color != Color.White) dropdown.ForeColor = Color.White;
+            dropdown.FlatStyle = FlatStyle.Flat;
+
+            if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, dropdown);
+            dropdown.BringToFront();
+            ctrl = dropdown;
+
+            if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
+
+            return dropdown;
+        }
+
         /// <summary>
         /// Creates a Label.
         /// </summary>
@@ -155,7 +192,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, btn);
             ctrl = btn;
 
-            if (border) CreatePicBox(color: Color.Black, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
+            if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
             return btn;
         }
@@ -191,8 +228,8 @@ namespace Sustineri_Verdieping
             numBox.BringToFront();
             ctrl = numBox;
 
-            if (border) CreatePicBox(color: Color.Black, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
-            
+            if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
+
             return numBox;
         }
 

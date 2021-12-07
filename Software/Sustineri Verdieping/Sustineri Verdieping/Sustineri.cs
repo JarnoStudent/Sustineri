@@ -21,6 +21,7 @@ namespace Sustineri_Verdieping
         Bitmap logoSustineri = Properties.Resources.Cas_sustineri_logo;
         Bitmap logoDroplet = Properties.Resources.Cas_sustineri_logo_NoWords;
         Bitmap backgroundImage = Properties.Resources.backgroundImage;
+        Bitmap backgroundImageToBlack = Properties.Resources.backgroundImageDipToBlack;
         Bitmap refreshImage = Properties.Resources.refresh;
         Bitmap logoutImage = Properties.Resources.signout;
         const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
@@ -191,7 +192,9 @@ namespace Sustineri_Verdieping
             int extraPageLength = 0;
             if (isRegisterPage)
             {
-                panel1.AutoScroll = true;
+                panel1.HorizontalScroll.Maximum = 0;
+                panel1.AutoScroll = true;                
+
                 //passwordConfirmation
                 CreateControls pwConfirmlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
                 pwConfirmlbl.CreateLabel("Wachtwoord Bevestigen", textAlignment: ContentAlignment.BottomLeft);
@@ -246,8 +249,47 @@ namespace Sustineri_Verdieping
                 CreateControls cityBox = new CreateControls(new Point(cityLbl.ObjPoint.X, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), cityLbl.ObjSize, panel1, "City");
                 cityBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
 
+                //gender
+                CreateControls genderLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
+                genderLbl.CreateLabel("Gender", textAlignment: ContentAlignment.BottomLeft);
+                //Gender dropdown
+                CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), genderLbl.ObjSize, panel1, "Gender");
+                genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Neutraal" }, "...", roundCornerDiameter: textboxRoundness);
 
-                extraPageLength = postalBox.ObjPoint.Y - pwBox.ObjPoint.Y;
+                //Birth date
+                CreateControls birthDateLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
+                birthDateLbl.CreateLabel("Geboortedatum", textAlignment: ContentAlignment.BottomLeft);
+                string[] days = new string[31];
+                string[] months = new string[12];
+                string[] years = new string[90];
+                for (int i = 0; i < days.Count(); i++)
+                {
+                    int day = i + 1;
+                    if (day < 10) days[i] = 0 + day.ToString();
+                    else days[i] = day.ToString();
+                }
+                for (int i = 0; i < months.Count(); i++)
+                {
+                    int month = i + 1;
+                    if (month < 10) months[i] = 0 + month.ToString();
+                    else months[i] = month.ToString();
+                }
+                for (int i = 0; i < years.Count(); i++)
+                {
+                    int year = DateTime.Now.Year - i - 1;
+                    years[i] = year.ToString();
+                }
+                int objSizeCalc = birthDateLbl.ObjSize.Width / 11;
+                int objSizeX = objSizeCalc * 3;
+                //Birth date dropdown
+                CreateControls dayDropDown = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), new Size(objSizeX, title.ObjSize.Height), panel1);
+                dayDropDown.CreateDropDown(days, "Dag", roundCornerDiameter: textboxRoundness);
+                CreateControls monthDropDown = new CreateControls(new Point(labelCenterX + objSizeX + objSizeCalc, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(objSizeX, title.ObjSize.Height), panel1);
+                monthDropDown.CreateDropDown(months, "Maand", roundCornerDiameter: textboxRoundness);
+                CreateControls yearDropDown = new CreateControls(new Point(labelCenterX + title.ObjSize.Width - objSizeX, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(objSizeX, title.ObjSize.Height), panel1);
+                yearDropDown.CreateDropDown(years, "Jaar", roundCornerDiameter: textboxRoundness);
+
+                extraPageLength = yearDropDown.ObjPoint.Y - pwBox.ObjPoint.Y;
             }
 
             //buttons
@@ -265,13 +307,18 @@ namespace Sustineri_Verdieping
 
             CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight + extraPageLength), panel1, "background");
             colorField.CreatePicBox(color: Color.White, sendToBack: true, roundCornerDiameter: standardRoundingDiameter);
-
-            CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
-            background.CreatePicBox(backgroundImage, sendToBack: true);
+                        
             if (panel1.VerticalScroll.Visible)
             {
-                CreateControls backgroundExtended = new CreateControls(new Point(0, panel1.Height), new Size(panel1.Width, colorField.ObjPoint.Y*2), panel1, "background");
+                CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
+                background.CreatePicBox(backgroundImageToBlack, sendToBack: true);
+                CreateControls backgroundExtended = new CreateControls(new Point(0, panel1.Height), new Size(panel1.Width, colorField.ObjPoint.Y * 2 + colorField.ObjSize.Height - screenHeight), panel1, "background");
                 backgroundExtended.CreatePicBox(color: Color.Black, sendToBack: true);
+            }
+            else
+            {
+                CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
+                background.CreatePicBox(backgroundImage, sendToBack: true);
             }
         }
 

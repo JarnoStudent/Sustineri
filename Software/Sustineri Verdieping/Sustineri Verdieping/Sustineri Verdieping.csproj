@@ -97,5 +97,8 @@
   <ItemGroup>
     <None Include="Resources\signout.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\backgroundImageDipToBlack.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
