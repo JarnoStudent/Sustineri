@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Sustineri_Verdieping
 {
@@ -24,8 +25,9 @@ namespace Sustineri_Verdieping
         Bitmap backgroundImageToBlack = Properties.Resources.backgroundImageDipToBlack;
         Bitmap refreshImage = Properties.Resources.refresh;
         Bitmap logoutImage = Properties.Resources.signout;
+        Bitmap accInfoImage = Properties.Resources.accountInfo;
         const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
-        const string LOGIN = "Login", LOGOUT = "Afmelden", REGISTER = "Registreren", BACK = "Terug", CREATEUSER = "CreateUser";
+        List<Series> chartSeries = new List<Series>();
 
         List<Button> menuMainButtons;
         Label themeBar;
@@ -51,6 +53,19 @@ namespace Sustineri_Verdieping
             Water,
             Home
         }
+        /// <summary>
+        /// Names in Dutch so it can also be used as tekst
+        /// </summary>
+        enum BtnClickEvents
+        {
+            Login,
+            Afmelden,
+            Registreren,
+            Terug,
+            MaakGebruiker,
+            Verversen,
+            GebruikersInformatie            
+        }
 
         /// <summary>
         /// Adds the bar at the top of the screen to be able to close or minimize the application
@@ -71,14 +86,72 @@ namespace Sustineri_Verdieping
         private void PageSwitcher(object sender, EventArgs e)
         {
             Control ctrl = sender as Control;
+            bool valid = true; // set valid to false if something went wrong like unable to create account or unable to login.
+
+            switch (ctrl.Name)
+            {
+                case nameof(BtnClickEvents.Login)://Validation required
+                    if (valid)
+                    {
+                        panel1.Controls.Clear(); // put in HomePage() later
+                        MenuMain();
+                    }
+                    break;
+
+                case nameof(BtnClickEvents.Terug):
+                case nameof(BtnClickEvents.Afmelden):
+                    panel2.Controls.Clear();
+                    panel2.Visible = false;
+                    LoginPage();
+                    break;
+
+                case nameof(BtnClickEvents.Registreren):
+                    LoginPage(true);
+                    break;
+
+                case nameof(BtnClickEvents.MaakGebruiker)://Validation required
+                    if (valid)
+                    {
+                        LoginPage();
+                    }
+                    break;
+
+                case nameof(BtnClickEvents.Verversen):
+                    for (int i = 0; i < chartSeries.Count; i++)
+                    {
+                        Refresh();
+                    }
+                    break;
+
+                case nameof(BtnClickEvents.GebruikersInformatie):
+                    valid = false;//remove when page can be created
+                    //UserInfoPage();
+                    break;                
+
+                case nameof(Pages.Home):
+                    valid = false;//remove when page can be created
+                    //HomePage();
+                    break;
+
+                case nameof(Pages.Water):
+                    valid = false;//remove when page can be created
+                    //WaterPage();
+                    break;
+
+                case nameof(Pages.Gas):
+                    GasPage();
+                    break;
+                    //etc...
+            }
 
             //Recoloring page switcher buttons depending on which one was clicked
-            if (menuMainButtons != null)
+            if (menuMainButtons != null && valid)
                 for (int i = 0; i < menuMainButtons.Count; i++)
                 {
                     if (menuMainButtons[i] == ctrl)
                     {
-                        if (menuMainButtons[i].Name == Pages.Gas.ToString()) { menuMainButtons[i].BackColor = ColorSustineri.Green; themeBar.BackColor = ColorSustineri.Green; }
+                        if (menuMainButtons[i].Name == nameof(Pages.Gas) || menuMainButtons[i].Name == nameof(BtnClickEvents.GebruikersInformatie))
+                        { menuMainButtons[i].BackColor = ColorSustineri.Green; themeBar.BackColor = ColorSustineri.Green; }
                         else { menuMainButtons[i].BackColor = ColorSustineri.Blue; themeBar.BackColor = ColorSustineri.Blue; }
                         menuMainButtons[i].ForeColor = Color.White;
                     }
@@ -89,27 +162,7 @@ namespace Sustineri_Verdieping
                     }
                 }
 
-            panel1.Controls.Clear();
-            switch (ctrl.Name)
-            {
-                case LOGIN:
-                    MenuMain();//add login check later
-                    break;
-                case BACK:
-                case LOGOUT:
-                    panel2.Controls.Clear();
-                    panel2.Visible = false;
-                    LoginPage();
-                    break;
-                case REGISTER:
-                    LoginPage(true);
-                    break;
-                case CREATEUSER:
-                    //check if user is created and add error or jump to login page depending on result
-                    LoginPage();
-                    break;
-                    //etc...
-            }
+
         }
 
         /// <summary>
@@ -118,25 +171,31 @@ namespace Sustineri_Verdieping
         private void MenuMain()
         {
             panel2.Visible = true;
+            panel2.Controls.Clear();
             int btnWidth = screenWidth / 15;
             int borderWidth = 4;
-
+            int xLine = 1;
             int minBtnWidth = 80;
             if (btnWidth < minBtnWidth) btnWidth = minBtnWidth;
 
             CreateControls logo = new CreateControls(new Point(btnWidth, (panel2.Height - LOGO_SUSTINERI_Y) / 2), new Size(LOGO_SUSTINERI_X, LOGO_SUSTINERI_Y), panel2, "logo");
             logo.CreatePicBox(logoSustineri);
 
-            CreateControls logOutBtn = new CreateControls(new Point(panel2.Width - btnWidth, 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, LOGOUT);
+            CreateControls logOutBtn = new CreateControls(new Point(panel2.Width - btnWidth * xLine++, 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, nameof(BtnClickEvents.Afmelden));
             logOutBtn.CreateButton(PageSwitcher, image: logoutImage);
+
             menuMainButtons = new List<Button>();
+
+            CreateControls accInfoBtn = new CreateControls(new Point(panel2.Width - btnWidth * xLine++, 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, nameof(BtnClickEvents.GebruikersInformatie));
+            // accInfoBtn.CreateButton(PageSwitcher, image: accInfoImage);
+            menuMainButtons.Add(accInfoBtn.CreateButton(PageSwitcher, image: accInfoImage));
 
             for (int i = 0; i < Enum.GetNames(typeof(Pages)).Count(); i++)
             {
                 string name = Enum.GetName(typeof(Pages), i);
-                CreateControls btn = new CreateControls(new Point(panel2.Width - (btnWidth * (i + 2)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
+                CreateControls btn = new CreateControls(new Point(panel2.Width - (btnWidth * (xLine++)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
                 Button button = btn.CreateButton(PageSwitcher, name, FontSustineri.H1);
-                if (button.Name == Pages.Home.ToString()) { button.BackColor = ColorSustineri.Blue; button.ForeColor = Color.White; }
+                if (button.Name == nameof(Pages.Home)) { button.BackColor = ColorSustineri.Blue; button.ForeColor = Color.White; }
                 menuMainButtons.Add(button);
             }
 
@@ -150,6 +209,9 @@ namespace Sustineri_Verdieping
         /// </summary>
         private void LoginPage(bool isRegisterPage = false)
         {
+            panel1.Controls.Clear();
+            chartSeries.Clear();
+
             int line = 0;
             int lineOffset = 10;
             int fieldWidth = panel1.Width / 3;
@@ -162,14 +224,14 @@ namespace Sustineri_Verdieping
 
             string titleText = "Inloggen";
             string nameText = "Naam";
-            string leftBtnText = LOGIN;
-            string rightBtnText = REGISTER;
+            string leftBtnText = nameof(BtnClickEvents.Login);
+            string rightBtnText = nameof(BtnClickEvents.Registreren);
             if (isRegisterPage)
             {
                 titleText = "Registreren";
                 nameText += $" (max {maxCharLength} karakters)";
-                leftBtnText = BACK;
-                rightBtnText = CREATEUSER;
+                leftBtnText = nameof(BtnClickEvents.Terug);
+                rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
             }
 
             CreateControls title = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * line)), new Size(labelWidth, labelHeight + 5), panel1);
@@ -193,7 +255,7 @@ namespace Sustineri_Verdieping
             if (isRegisterPage)
             {
                 panel1.HorizontalScroll.Maximum = 0;
-                panel1.AutoScroll = true;                
+                panel1.AutoScroll = true;
 
                 //passwordConfirmation
                 CreateControls pwConfirmlbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
@@ -297,7 +359,7 @@ namespace Sustineri_Verdieping
             CreateControls leftBtn = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((labelHeight + lineOffset) * ++line) + labelHeight), new Size(btnWidth, labelHeight * 2), panel1, leftBtnText);
             leftBtn.CreateButton(PageSwitcher, leftBtnText, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
             CreateControls rightButton = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, leftBtn.ObjPoint.Y), new Size(btnWidth, labelHeight * 2), panel1, rightBtnText);
-            rightButton.CreateButton(PageSwitcher, REGISTER, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+            rightButton.CreateButton(PageSwitcher, nameof(BtnClickEvents.Registreren), color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
 
             //visual appearance
             int fieldHeight = pwBox.ObjPoint.Y + rightButton.ObjSize.Height;
@@ -307,7 +369,7 @@ namespace Sustineri_Verdieping
 
             CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight + extraPageLength), panel1, "background");
             colorField.CreatePicBox(color: Color.White, sendToBack: true, roundCornerDiameter: standardRoundingDiameter);
-                        
+
             if (panel1.VerticalScroll.Visible)
             {
                 CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
@@ -322,7 +384,24 @@ namespace Sustineri_Verdieping
             }
         }
 
+        private void GasPage()
+        {
+            panel1.Controls.Clear();
+            chartSeries.Clear();
+            int chartWidth = screenWidth / 10 * 8;
 
+            CreateCharts chart = new CreateCharts(new Point(100, 100), new Size(chartWidth, screenHeight / 2), panel1, nameof(Pages.Gas));
+            //temp fake data DELETE WHEN DATABASE EXISTS
+            List<string> stringlisttest = new List<string>() { "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag" };
+            List<double> doublelisttest = new List<double>() { 10, 2, 6, 40, 5, 7, 50 };
+            List<double> listDouble = ConvertToPercentageList(doublelisttest);
+            //fake data till here
+
+            chart.Design(SeriesChartType.Column, stringlisttest, listDouble, "PerWeek");
+            chartSeries.Add(chart.ChartObj.Series[0]);
+            //updates charts
+            for (int i = 0; i < chartSeries.Count; i++) Refresh(chartSeries[i], stringlisttest, doublelisttest);
+        }
 
         /// <summary>
         /// closes the application
@@ -338,6 +417,60 @@ namespace Sustineri_Verdieping
         private void MinimizeApp(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
+        }
+
+        /// <summary>
+        /// Refreshes a chart series or label
+        /// </summary>
+        private void Refresh(Series series, List<string> x, List<double> y)
+        {
+            series.Points.DataBindXY(x, y);
+        }
+        /// <summary>
+        /// Refreshes a chart series or label
+        /// </summary>
+        private void Refresh(Label label, string newText)
+        {
+            label.Text = newText;
+        }
+        /// <summary>
+        /// Refreshes a chart series or label
+        /// </summary>
+        private void Refresh(CreateControls label, string newText)
+        {
+            if (label.Ctrl is Label)
+            {
+                Label lbl = label.Ctrl as Label;
+                lbl.Text = newText;
+            }
+        }
+        /// <summary>
+        /// Refreshes a chart series or label
+        /// </summary>
+        private void Refresh(Control label, string newText)
+        {
+            if (label is Label)
+            {
+                Label lbl = label as Label;
+                lbl.Text = newText;
+            }
+        }
+
+        /// <summary>
+        /// Returns the list in percentages
+        /// </summary>
+        /// <param name="list">List to be converted</param>
+        /// <returns></returns>
+        private List<double> ConvertToPercentageList(List<double> list)
+        {
+            List<double> percentages = new List<double>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                double total = list.Sum();
+                double percentage = Math.Round(list[i] / (total / 100), 1);
+                percentages.Add(percentage);
+            }
+            return percentages;
         }
 
     }

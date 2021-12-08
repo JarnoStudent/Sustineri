@@ -10,7 +10,7 @@ namespace Sustineri_Verdieping
     /// </summary>
     public class Controls
     {
-        protected Control ctrl = null;
+        public Control Ctrl { get; protected set; }
         protected Control ctrlBorder = null;
         public Point ObjPoint
         {
@@ -20,7 +20,7 @@ namespace Sustineri_Verdieping
             }
             set
             {
-                if (ctrl != null) ctrl.Location = value;
+                if (Ctrl != null) Ctrl.Location = value;
                 if (ctrlBorder != null) ObjParent.Controls.Remove(ctrlBorder);
             }
         }
@@ -32,7 +32,7 @@ namespace Sustineri_Verdieping
             }
             set
             {
-                if (ctrl != null) ctrl.Size = value;
+                if (Ctrl != null) Ctrl.Size = value;
                 if (ctrlBorder != null) ObjParent.Controls.Remove(ctrlBorder);
             }
         }
@@ -114,7 +114,7 @@ namespace Sustineri_Verdieping
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, dropdown);
             dropdown.BringToFront();
-            ctrl = dropdown;
+            Ctrl = dropdown;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -148,7 +148,7 @@ namespace Sustineri_Verdieping
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, label);
             label.BringToFront();
-            ctrl = label;
+            Ctrl = label;
 
             return label;
         }
@@ -190,7 +190,7 @@ namespace Sustineri_Verdieping
             btn.BringToFront();
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, btn);
-            ctrl = btn;
+            Ctrl = btn;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -226,7 +226,7 @@ namespace Sustineri_Verdieping
             numBox.BorderStyle = BorderStyle.FixedSingle;
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, numBox);
             numBox.BringToFront();
-            ctrl = numBox;
+            Ctrl = numBox;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -261,7 +261,7 @@ namespace Sustineri_Verdieping
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, txtBox);
             txtBox.BringToFront();
-            ctrl = txtBox;
+            Ctrl = txtBox;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -294,7 +294,7 @@ namespace Sustineri_Verdieping
             if (sendToBack) picBox.SendToBack();
             else picBox.BringToFront();
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, picBox);
-            if (bleed == 0) ctrl = picBox;
+            if (bleed == 0) Ctrl = picBox;
             else ctrlBorder = picBox;
 
             return picBox;
