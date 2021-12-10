@@ -94,7 +94,7 @@ namespace Sustineri_Verdieping
         /// <param name="color">Optional, sets background color of this object and if it is not white or empty text color will be white</param>
         /// <param name="roundCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <returns></returns>
-        public ComboBox CreateDropDown(string[] items, string text = "", Font font = null, Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
+        public ComboBox CreateDropDown(string[] items, string text = "...", Font font = null, Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
         {
             ComboBox dropdown = new ComboBox();
             dropdown.Name = ObjName;
@@ -104,18 +104,20 @@ namespace Sustineri_Verdieping
 
             if (items != null) dropdown.Items.AddRange(items);
 
-            dropdown.Text = text;
+            dropdown.Text = text;            
             if (font != null) dropdown.Font = font;
             else dropdown.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             dropdown.BackColor = color;
             if (color != Color.White) dropdown.ForeColor = Color.White;
             dropdown.FlatStyle = FlatStyle.Flat;
+            dropdown.MaxDropDownItems = 7;
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, dropdown);
             dropdown.BringToFront();
             Ctrl = dropdown;
 
+            protsize = new Size(Ctrl.Width, Ctrl.Height);
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
             return dropdown;
@@ -227,6 +229,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, numBox);
             numBox.BringToFront();
             Ctrl = numBox;
+            protsize = new Size(Ctrl.Width, Ctrl.Height);
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -262,6 +265,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, txtBox);
             txtBox.BringToFront();
             Ctrl = txtBox;
+            protsize = new Size(Ctrl.Width, Ctrl.Height);
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 

@@ -62,13 +62,12 @@ namespace Sustineri_Verdieping
                 if (i < vertical.Count && vertical[i] != 0) chartSeries.Points.AddXY(horizontal[i], vertical[i]);
                 else chartSeries.Points.AddXY(horizontal[i], double.NaN);
             }
+            ChartObj.SendToBack();
 
             PointsX = horizontal;
             PointsY = vertical;
 
             return ChartObj;
         }
-
-
     }
 }
