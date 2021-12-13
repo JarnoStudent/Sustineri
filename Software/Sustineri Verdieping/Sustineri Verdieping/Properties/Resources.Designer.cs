@@ -63,9 +63,29 @@ namespace Sustineri_Verdieping.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap accountInfo {
+            get {
+                object obj = ResourceManager.GetObject("accountInfo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap backgroundImage {
             get {
                 object obj = ResourceManager.GetObject("backgroundImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap backgroundImageDipToBlack {
+            get {
+                object obj = ResourceManager.GetObject("backgroundImageDipToBlack", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
