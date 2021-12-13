@@ -40,6 +40,7 @@ namespace Sustineri_Verdieping
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
+        List<Control> registerControls;
         Label themeBar;
 
         public Sustineri()
@@ -204,7 +205,7 @@ namespace Sustineri_Verdieping
         }
 
 
-        private int CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0)
+        private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0)
         {
             int labelCenterX = (panel1.Width - width) / 2;
             labelCenterX += addToXPos;
@@ -212,7 +213,7 @@ namespace Sustineri_Verdieping
 
             CreateControls textBox = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), label.ObjSize, panel1, text);
             textBox.CreateTextBox(isPassword: isPassword, maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-            return textBox.ObjPoint.Y;
+            return textBox;
         }
 
         private CreateControls CreateField(string titleText, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0)
@@ -256,16 +257,18 @@ namespace Sustineri_Verdieping
             string rightBtnText = nameof(BtnClickEvents.Registreren);
             if (isRegisterPage)
             {
+                registerControls = new List<Control>();
                 titleText = "Registreren";
                 nameText += $" (max {maxCharLength} karakters)";
                 leftBtnText = nameof(BtnClickEvents.Terug);
-                rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
+                rightBtnText = nameof(BtnClickEvents.MaakGebruiker);                
             }
 
             CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H1, ContentAlignment.MiddleCenter);
 
             CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
-            int lastLoginObjectPos = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
+            CreateControls password = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
+            int lastLoginObjectPos = password.ObjPoint.Y; 
 
             int extraPageLength = 0;
             if (isRegisterPage)
@@ -273,25 +276,26 @@ namespace Sustineri_Verdieping
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
                 // Password confirmation
-                CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true); line++;
+                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true).Ctrl); line++;
                 // First name
-                CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line); line++;
+                registerControls.Add(CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
-                CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
-                CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5);
+                registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
+                registerControls.Add(CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
                 // E-mail
-                CreateSingleLineInput("e-mail", labelWidth, ++line); line++;
+                registerControls.Add(CreateSingleLineInput("e-mail", labelWidth, ++line).Ctrl); line++;
                 // Street and housenumber
-                CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5);
-                CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3);
+                registerControls.Add(CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5).Ctrl);
+                registerControls.Add(CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3).Ctrl);
                 // Postal code and city
-                CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
-                CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5);
+                registerControls.Add(CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
+                registerControls.Add(CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
                 // Gender
                 CreateField("Gender", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
                 //Gender dropdown
                 CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(labelWidth / 3, avgLabelHeight), panel1, "Gender");
                 genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Neutraal" }, roundCornerDiameter: textboxRoundness);
+                registerControls.Add(genderDropDown.Ctrl);
 
                 CreateField("Geboortedatum", labelWidth, ++line);
                 string[] days = new string[31];
