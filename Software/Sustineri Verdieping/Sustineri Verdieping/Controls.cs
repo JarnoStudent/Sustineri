@@ -272,9 +272,7 @@ namespace Sustineri_Verdieping
                 Name = ObjName,
                 Location = ObjPoint,
                 Size = ObjSize,
-                Parent = ObjParent,
-                BorderStyle = BorderStyle.None,
-                MaxLength = maxLength
+                Parent = ObjParent
             };
 
             if (font != null) txtBox.Font = font;
@@ -283,6 +281,8 @@ namespace Sustineri_Verdieping
             if (color.IsEmpty) color = Color.White;
             txtBox.BackColor = color;
 
+            txtBox.BorderStyle = BorderStyle.None;
+            txtBox.MaxLength = maxLength;
             if (isPassword) txtBox.PasswordChar = '•';
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, txtBox);
