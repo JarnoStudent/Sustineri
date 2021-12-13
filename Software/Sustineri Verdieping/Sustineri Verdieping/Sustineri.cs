@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -23,22 +20,22 @@ namespace Sustineri_Verdieping
         public int screenWidth = 0;
         public int screenHeight = 0;
 
-        private int standardRoundingDiameter = 20;
-        private int textboxRoundness = 8;
+        private readonly int standardRoundingDiameter = 20;
+        private readonly int textboxRoundness = 8;
 
-        int avgChartWidth;
-        int avgChartHeight;
-        int avgChartPosX;
-        int firstChartPosY;
-        int avgLabelHeight = 20;
+        private int avgChartWidth;
+        private int avgChartHeight;
+        private int avgChartPosX;
+        private int firstChartPosY;
+        private int avgLabelHeight = 20;
 
-        Bitmap logoSustineri = Properties.Resources.Cas_sustineri_logo;
-        Bitmap logoDroplet = Properties.Resources.Cas_sustineri_logo_NoWords;
-        Bitmap backgroundImage = Properties.Resources.backgroundImage;
-        Bitmap backgroundImageToBlack = Properties.Resources.backgroundImageDipToBlack;
-        Bitmap refreshImage = Properties.Resources.refresh;
-        Bitmap logoutImage = Properties.Resources.signout;
-        Bitmap accInfoImage = Properties.Resources.accountInfo;
+        private readonly Bitmap logoSustineri = Properties.Resources.Cas_sustineri_logo;
+        private readonly Bitmap logoDroplet = Properties.Resources.Cas_sustineri_logo_NoWords;
+        private readonly Bitmap backgroundImage = Properties.Resources.backgroundImage;
+        private readonly Bitmap backgroundImageToBlack = Properties.Resources.backgroundImageDipToBlack;
+        private readonly Bitmap refreshImage = Properties.Resources.refresh;
+        private readonly Bitmap logoutImage = Properties.Resources.signout;
+        private readonly Bitmap accInfoImage = Properties.Resources.accountInfo;
         const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
@@ -62,53 +59,6 @@ namespace Sustineri_Verdieping
             panel2.Visible = false;
             panel3.BackColor = Color.FromArgb(240, 240, 240);
             this.Shown += new EventHandler(Toolbar);//becomes the login page later
-        }
-
-        enum Pages
-        {
-            Gas,
-            Water,
-            Home
-        }
-
-        /// <summary>
-        /// Names in Dutch so it can also be used as tekst
-        /// </summary>
-        enum BtnClickEvents
-        {
-            Login,
-            Afmelden,
-            Registreren,
-            Terug,
-            MaakGebruiker,
-            Verversen,
-            GebruikersInformatie
-        }
-
-        enum Months
-        {
-            jan,
-            feb,
-            mrt,
-            apr,
-            mei,
-            jun,
-            jul,
-            aug,
-            sept,
-            okt,
-            nov,
-            dec
-        }
-        enum Days
-        {
-            maandag,
-            dinsdag,
-            woensdag,
-            donderdag,
-            vrijdag,
-            zaterdag,
-            zondag
         }
 
         /// <summary>
@@ -163,7 +113,14 @@ namespace Sustineri_Verdieping
                 case nameof(BtnClickEvents.Verversen):
                     for (int i = 0; i < chartSeries.Count; i++)
                     {
-                        Refresh();
+                        if (chartSeries[i].Name == nameof(Pages.Gas))
+                        {
+                            Refresh(chartSeries[i], timePeriod, gasData);
+                        }
+                        if (chartSeries[i].Name == nameof(Pages.Water))
+                        {
+                            Refresh(chartSeries[i], timePeriod, waterData);
+                        }
                     }
                     break;
 
@@ -205,8 +162,6 @@ namespace Sustineri_Verdieping
                         menuMainButtons[i].ForeColor = Color.Black;
                     }
                 }
-
-
         }
 
         /// <summary>
@@ -248,6 +203,35 @@ namespace Sustineri_Verdieping
             //add HomePage(); later
         }
 
+
+        private int CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0)
+        {
+            int labelCenterX = (panel1.Width - width) / 2;
+            labelCenterX += addToXPos;
+            CreateControls label = CreateField(text, width, line, addToXPos: addToXPos);
+
+            CreateControls textBox = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), label.ObjSize, panel1, text);
+            textBox.CreateTextBox(isPassword: isPassword, maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
+            return textBox.ObjPoint.Y;
+        }
+
+        private CreateControls CreateField(string titleText, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0)
+        {
+            int labelCenterX = (panel1.Width - labelWidth) / 2;
+            labelCenterX += addToXPos;
+            CreateControls label = new CreateControls(new Point(labelCenterX, CalculatePosition(line)), new Size(labelWidth, avgLabelHeight + 5), panel1);
+            label.CreateLabel(titleText, font, contentAlign);
+            return label;
+        }
+
+        private int CalculatePosition(int line)
+        {
+            int baseHeight = panel1.Height / 2;
+            int lineOffset = 10;
+            return baseHeight + ((avgLabelHeight + lineOffset) * line);
+        }
+
+
         /// <summary>
         /// Creates the login page
         /// </summary>
@@ -278,93 +262,38 @@ namespace Sustineri_Verdieping
                 rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
             }
 
-            CreateControls title = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(labelWidth, avgLabelHeight + 5), panel1);
-            title.CreateLabel(titleText, FontSustineri.H1);
+            CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H1, ContentAlignment.MiddleCenter);
 
-            //name
-            CreateControls namelbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-            namelbl.CreateLabel(nameText, textAlignment: ContentAlignment.BottomLeft);
-            //name textbox
-            CreateControls nameBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Name");
-            nameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-
-            //password
-            CreateControls pwlbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-            pwlbl.CreateLabel("Wachtwoord", textAlignment: ContentAlignment.BottomLeft);
-            //passwordtextbox
-            CreateControls pwBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Password");
-            pwBox.CreateTextBox(isPassword: true, roundCornerDiameter: textboxRoundness);
+            CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
+            int lastLoginObjectPos = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
 
             int extraPageLength = 0;
             if (isRegisterPage)
             {
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
-
-                //passwordConfirmation
-                CreateControls pwConfirmlbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-                pwConfirmlbl.CreateLabel("Wachtwoord Bevestigen", textAlignment: ContentAlignment.BottomLeft);
-                //textbox
-                CreateControls pwConfirmBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "Password Confirmation");
-                pwConfirmBox.CreateTextBox(isPassword: true, roundCornerDiameter: textboxRoundness);
-
-                //first name
-                CreateControls firstNameLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-                firstNameLbl.CreateLabel($"Voornaam (max {maxCharLength} karakters)", textAlignment: ContentAlignment.BottomLeft);
-                //textbox
-                CreateControls firstNameBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "FirstName");
-                firstNameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-
-                //insertion & last name labels
-                CreateControls insertionLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
-                insertionLbl.CreateLabel("Tussenvoegsel", textAlignment: ContentAlignment.BottomLeft);
-                CreateControls lastNameLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 5 * 2, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
-                lastNameLbl.CreateLabel($"Achternaam (max {maxCharLength} karakters)", textAlignment: ContentAlignment.BottomLeft);
-                //textboxes
-                CreateControls insertBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), insertionLbl.ObjSize, panel1, "Insertion");
-                insertBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-                CreateControls lastNameBox = new CreateControls(new Point(lastNameLbl.ObjPoint.X, baseHeight + ((avgLabelHeight + lineOffset) * line)), lastNameLbl.ObjSize, panel1, "Insertion");
-                lastNameBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-
-                //e-mail label
-                CreateControls emailLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-                emailLbl.CreateLabel("e-mail", textAlignment: ContentAlignment.BottomLeft);
-                //textbox
-                CreateControls emailBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1, "E-mail");
-                emailBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
-
-                //street & house number
-                CreateControls streetLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
-                streetLbl.CreateLabel("Straat", textAlignment: ContentAlignment.BottomLeft);
-                CreateControls houseNumberLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 3 * 2, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
-                houseNumberLbl.CreateLabel("Huisnummer", textAlignment: ContentAlignment.BottomLeft);
-                //textbox
-                CreateControls streetBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), streetLbl.ObjSize, panel1, "Street");
-                streetBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
-                CreateControls houseNumberBox = new CreateControls(new Point(houseNumberLbl.ObjPoint.X, baseHeight + ((avgLabelHeight + lineOffset) * line)), houseNumberLbl.ObjSize, panel1, "HouseNumber");
-                houseNumberBox.CreateTextBox(maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
-
-                //postalcode & city
-                CreateControls postalcodeLbl = new CreateControls(new Point(labelCenterX, panel1.Height / 2 + ((avgLabelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
-                postalcodeLbl.CreateLabel("Postcode", textAlignment: ContentAlignment.BottomLeft);
-                CreateControls cityLbl = new CreateControls(new Point(labelCenterX + title.ObjSize.Width / 5 * 2, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(title.ObjSize.Width / 5 * 3, title.ObjSize.Height), panel1);
-                cityLbl.CreateLabel("Stad", textAlignment: ContentAlignment.BottomLeft);
-                //textbox
-                CreateControls postalBox = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), postalcodeLbl.ObjSize, panel1, "PostalCode");
-                postalBox.CreateTextBox(maxLength: 4, roundCornerDiameter: textboxRoundness);
-                CreateControls cityBox = new CreateControls(new Point(cityLbl.ObjPoint.X, baseHeight + ((avgLabelHeight + lineOffset) * line)), cityLbl.ObjSize, panel1, "City");
-                cityBox.CreateTextBox(roundCornerDiameter: textboxRoundness);
-
-                //gender
-                CreateControls genderLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(title.ObjSize.Width / 3, title.ObjSize.Height), panel1);
-                genderLbl.CreateLabel("Gender", textAlignment: ContentAlignment.BottomLeft);
+                // Password confirmation
+                CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true); line++;
+                // First name
+                CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line); line++;
+                // Insertion and last name
+                CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
+                CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5);
+                // E-mail
+                CreateSingleLineInput("e-mail", labelWidth, ++line); line++;
+                // Street and housenumber
+                CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5);
+                CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3);
+                // Postal code and city
+                CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
+                CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5);
+                // Gender
+                CreateField("Gender", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
                 //Gender dropdown
-                CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), genderLbl.ObjSize, panel1, "Gender");
+                CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(labelWidth / 3, avgLabelHeight), panel1, "Gender");
                 genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Neutraal" }, roundCornerDiameter: textboxRoundness);
 
-                //Birth date
-                CreateControls birthDateLbl = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), title.ObjSize, panel1);
-                birthDateLbl.CreateLabel("Geboortedatum", textAlignment: ContentAlignment.BottomLeft);
+                CreateField("Geboortedatum", labelWidth, ++line);
                 string[] days = new string[31];
                 string[] months = new string[12];
                 string[] years = new string[90];
@@ -385,7 +314,7 @@ namespace Sustineri_Verdieping
                     int year = DateTime.Now.Year - i - 1;
                     years[i] = year.ToString();
                 }
-                int objSizeCalc = birthDateLbl.ObjSize.Width / 11;
+                int objSizeCalc = labelWidth / 11;
                 int objSizeX = objSizeCalc * 3;
                 //Birth date dropdown
                 CreateControls dayDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(objSizeX, title.ObjSize.Height), panel1);
@@ -395,7 +324,7 @@ namespace Sustineri_Verdieping
                 CreateControls yearDropDown = new CreateControls(new Point(labelCenterX + title.ObjSize.Width - objSizeX, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(objSizeX, title.ObjSize.Height), panel1);
                 yearDropDown.CreateDropDown(years, "Jaar", roundCornerDiameter: textboxRoundness);
 
-                extraPageLength = yearDropDown.ObjPoint.Y - pwBox.ObjPoint.Y;
+                extraPageLength = yearDropDown.ObjPoint.Y - lastLoginObjectPos;
             }
 
             //buttons
@@ -406,7 +335,7 @@ namespace Sustineri_Verdieping
             rightButton.CreateButton(PageSwitcher, nameof(BtnClickEvents.Registreren), color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
 
             //visual appearance
-            int fieldHeight = pwBox.ObjPoint.Y + rightButton.ObjSize.Height;
+            int fieldHeight = lastLoginObjectPos + rightButton.ObjSize.Height;
 
             CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, title.ObjPoint.Y - lineOffset * 4 - logoSizeY), new Size(logoSizeX, logoSizeY), panel1, "logo");
             logo.CreatePicBox(logoDroplet);
@@ -609,5 +538,53 @@ namespace Sustineri_Verdieping
         {
             this.WindowState = FormWindowState.Minimized;
         }
+    }
+
+    public enum Pages
+    {
+        Gas,
+        Water,
+        Home
+    }
+
+    /// <summary>
+    /// Names in Dutch so it can also be used as tekst
+    /// </summary>
+    public enum BtnClickEvents
+    {
+        Login,
+        Afmelden,
+        Registreren,
+        Terug,
+        MaakGebruiker,
+        Verversen,
+        GebruikersInformatie
+    }
+
+    public enum Months
+    {
+        jan,
+        feb,
+        mrt,
+        apr,
+        mei,
+        jun,
+        jul,
+        aug,
+        sept,
+        okt,
+        nov,
+        dec
+    }
+
+    public enum Days
+    {
+        maandag,
+        dinsdag,
+        woensdag,
+        donderdag,
+        vrijdag,
+        zaterdag,
+        zondag
     }
 }
