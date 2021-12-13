@@ -119,7 +119,7 @@ namespace Sustineri_Verdieping
             dropdown.BringToFront();
             Ctrl = dropdown;
 
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
             return dropdown;
@@ -140,7 +140,12 @@ namespace Sustineri_Verdieping
             datePicker.MaxDate = DateTime.Now.AddDays(1);
             datePicker.MinimumSize = ObjSize;
             datePicker.Value = DateTime.Now;
+            Ctrl = datePicker;
+
+            protsize = Ctrl.Size;
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
+            
+
 
             return datePicker;
         }
@@ -256,7 +261,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, numBox);
             numBox.BringToFront();
             Ctrl = numBox;
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -294,7 +299,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, txtBox);
             txtBox.BringToFront();
             Ctrl = txtBox;
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
