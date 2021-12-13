@@ -24,11 +24,12 @@ namespace Sustineri_Verdieping
 
         public Chart Design(SeriesChartType chartType, List<string> horizontal, List<double> vertical, string series, Color color = new Color(), int xMinimum = 0, bool valueAsLabel = true, bool isPercentage = false)
         {
-            ChartObj = new Chart();
-
-            ChartObj.Location = ObjPoint;
-            ChartObj.Size = ObjSize;
-            ChartObj.Parent = ObjParent;
+            ChartObj = new Chart
+            {
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent
+            };
 
             ChartObj.Titles.Add(ObjName);
             ChartObj.Titles[0].Font = FontSustineri.H1;
