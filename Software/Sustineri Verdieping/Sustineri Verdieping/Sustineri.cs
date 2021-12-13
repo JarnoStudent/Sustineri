@@ -46,6 +46,7 @@ namespace Sustineri_Verdieping
         public Sustineri()
         {
             InitializeComponent();
+            Console.WriteLine("Testing");
             Screen scrActive = Screen.FromControl(this);
             screenWidth = scrActive.Bounds.Width;
             screenHeight = scrActive.Bounds.Height;
@@ -116,10 +117,12 @@ namespace Sustineri_Verdieping
                     {
                         if (chartSeries[i].Name == nameof(Pages.Gas))
                         {
+                            //pull data from database into the list here
                             Refresh(chartSeries[i], timePeriod, gasData);
                         }
                         if (chartSeries[i].Name == nameof(Pages.Water))
                         {
+                            //pull data from database into the list here
                             Refresh(chartSeries[i], timePeriod, waterData);
                         }
                     }
@@ -298,37 +301,11 @@ namespace Sustineri_Verdieping
                 registerControls.Add(genderDropDown.Ctrl);
 
                 CreateField("Geboortedatum", labelWidth, ++line);
-                string[] days = new string[31];
-                string[] months = new string[12];
-                string[] years = new string[90];
-                for (int i = 0; i < days.Count(); i++)
-                {
-                    int day = i + 1;
-                    if (day < 10) days[i] = 0 + day.ToString();
-                    else days[i] = day.ToString();
-                }
-                for (int i = 0; i < months.Count(); i++)
-                {
-                    int month = i + 1;
-                    if (month < 10) months[i] = 0 + month.ToString();
-                    else months[i] = month.ToString();
-                }
-                for (int i = 0; i < years.Count(); i++)
-                {
-                    int year = DateTime.Now.Year - i - 1;
-                    years[i] = year.ToString();
-                }
-                int objSizeCalc = labelWidth / 11;
-                int objSizeX = objSizeCalc * 3;
-                //Birth date dropdown
-                CreateControls dayDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(objSizeX, title.ObjSize.Height), panel1);
-                dayDropDown.CreateDropDown(days, "Dag", roundCornerDiameter: textboxRoundness);
-                CreateControls monthDropDown = new CreateControls(new Point(labelCenterX + objSizeX + objSizeCalc, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(objSizeX, title.ObjSize.Height), panel1);
-                monthDropDown.CreateDropDown(months, "Maand", roundCornerDiameter: textboxRoundness);
-                CreateControls yearDropDown = new CreateControls(new Point(labelCenterX + title.ObjSize.Width - objSizeX, baseHeight + ((avgLabelHeight + lineOffset) * line)), new Size(objSizeX, title.ObjSize.Height), panel1);
-                yearDropDown.CreateDropDown(years, "Jaar", roundCornerDiameter: textboxRoundness);
+                //Birth date picker
+                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth/2, title.ObjSize.Height), panel1);
+                birthDate.CreateDatePicker(ColorSustineri.Green, textboxRoundness);
 
-                extraPageLength = yearDropDown.ObjPoint.Y - lastLoginObjectPos;
+                extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
             }
 
             //buttons
