@@ -16,6 +16,7 @@ namespace Sustineri_Verdieping
         List<double> gasData = new List<double>() { 10, 2, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58, 27, 59, 28, 49, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58 };
         List<double> waterData = new List<double>() { 85, 23, 66, 470, 65, 97, 240, 120, 340, 228, 229, 148, 21, 48, 58, 27, 59, 28, 49, 26, 40, 85, 87, 50, 220, 410, 328, 129, 148, 91, 148, 58 };
         //fake data till here
+        private uint waterLimit = uint.MaxValue;
 
         public int screenWidth = 0;
         public int screenHeight = 0;
@@ -36,12 +37,13 @@ namespace Sustineri_Verdieping
         private readonly Bitmap refreshImage = Properties.Resources.refresh;
         private readonly Bitmap logoutImage = Properties.Resources.signout;
         private readonly Bitmap accInfoImage = Properties.Resources.accountInfo;
-        const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
+        private const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
+        private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
         List<Control> registerControls;
-        Label themeBar;
+        PictureBox themeBar;
 
         public Sustineri()
         {
@@ -51,16 +53,16 @@ namespace Sustineri_Verdieping
             screenWidth = scrActive.Bounds.Width;
             screenHeight = scrActive.Bounds.Height;
             avgChartWidth = screenWidth / 10 * 8;
-            avgChartHeight = screenHeight / 2;
+            avgChartHeight = screenHeight / 3 * 2;
             avgChartPosX = (screenWidth - avgChartWidth) / 2;
-            firstChartPosY = panel1.Height / 5;
+            firstChartPosY = panel1.Height / 15;
 
             panel2.Height = LOGO_SUSTINERI_Y + LOGO_SUSTINERI_Y / 4 * 2;
             panel2.Parent = this;
             panel3.Parent = this;
             panel2.Visible = false;
             panel3.BackColor = Color.FromArgb(240, 240, 240);
-            this.Shown += new EventHandler(Toolbar);//becomes the login page later
+            this.Shown += new EventHandler(Toolbar);
         }
 
         /// <summary>
@@ -70,9 +72,9 @@ namespace Sustineri_Verdieping
         {
             int btnwidth = 60;
             CreateControls exitBtn = new CreateControls(new Point(screenWidth - btnwidth, 0), new Size(btnwidth, panel3.Height), panel3, "exit");
-            exitBtn.CreateButton(CloseApp, "⨉", FontSustineri.H1, color: Color.Red);
+            exitBtn.CreateButton(CloseApp, "⨉", FontSustineri.H2, color: Color.Red);
             CreateControls mimimizeBtn = new CreateControls(new Point(screenWidth - btnwidth * 3, 0), new Size(btnwidth, panel3.Height), panel3, "minimize");
-            mimimizeBtn.CreateButton(MinimizeApp, "—", FontSustineri.H1, color: Color.LightGray);
+            mimimizeBtn.CreateButton(MinimizeApp, "—", FontSustineri.H2, color: Color.LightGray);
             LoginPage();
         }
 
@@ -139,12 +141,11 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(Pages.Water):
-                    valid = false;//remove when page can be created
-                    //WaterPage();
+                    DataPage(TYPE_WATER, waterData, true);
                     break;
 
                 case nameof(Pages.Gas):
-                    GasPage();
+                    DataPage(TYPE_GAS, gasData);
                     break;
                     //etc...
             }
@@ -197,13 +198,13 @@ namespace Sustineri_Verdieping
             {
                 string name = Enum.GetName(typeof(Pages), i);
                 CreateControls btn = new CreateControls(new Point(panel2.Width - (btnWidth * (xLine++)), 0), new Size(btnWidth, panel2.Height - borderWidth), panel2, name);
-                Button button = btn.CreateButton(PageSwitcher, name, FontSustineri.H1);
+                Button button = btn.CreateButton(PageSwitcher, name, FontSustineri.H2);
                 if (button.Name == nameof(Pages.Home)) { button.BackColor = ColorSustineri.Blue; button.ForeColor = Color.White; }
                 menuMainButtons.Add(button);
             }
 
             CreateControls border = new CreateControls(new Point(0, panel2.Height - borderWidth), new Size(panel2.Width, borderWidth), panel2);
-            themeBar = border.CreateLabel(color: ColorSustineri.Blue);
+            themeBar = border.CreatePicBox(color: ColorSustineri.Blue);
             //add HomePage(); later
         }
 
@@ -219,12 +220,12 @@ namespace Sustineri_Verdieping
             return textBox;
         }
 
-        private CreateControls CreateField(string titleText, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0)
+        private CreateControls CreateField(string text, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0)
         {
             int labelCenterX = (panel1.Width - labelWidth) / 2;
             labelCenterX += addToXPos;
             CreateControls label = new CreateControls(new Point(labelCenterX, CalculatePosition(line)), new Size(labelWidth, avgLabelHeight + 5), panel1);
-            label.CreateLabel(titleText, font, contentAlign);
+            label.CreateLabel(text, font, contentAlign);
             return label;
         }
 
@@ -264,14 +265,14 @@ namespace Sustineri_Verdieping
                 titleText = "Registreren";
                 nameText += $" (max {maxCharLength} karakters)";
                 leftBtnText = nameof(BtnClickEvents.Terug);
-                rightBtnText = nameof(BtnClickEvents.MaakGebruiker);                
+                rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
             }
 
-            CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H1, ContentAlignment.MiddleCenter);
+            CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.MiddleCenter);
 
             CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
             CreateControls password = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
-            int lastLoginObjectPos = password.ObjPoint.Y; 
+            int lastLoginObjectPos = password.ObjPoint.Y;
 
             int extraPageLength = 0;
             if (isRegisterPage)
@@ -302,7 +303,7 @@ namespace Sustineri_Verdieping
 
                 CreateField("Geboortedatum", labelWidth, ++line);
                 //Birth date picker
-                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth/2, title.ObjSize.Height), panel1);
+                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth / 2, title.ObjSize.Height), panel1);
                 birthDate.CreateDatePicker(ColorSustineri.Green, textboxRoundness);
 
                 extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
@@ -339,36 +340,69 @@ namespace Sustineri_Verdieping
         }
 
         /// <summary>
-        /// Creates Gas page
+        /// Creates a data page using given data
         /// </summary>
-        private void GasPage()
+        /// <param name="dataType">Make sure to give each dataType string a unique name</param>
+        private void DataPage(string dataType, List<double> data, bool hasWaterLimitSetter = false)
         {
             panel1.Controls.Clear();
+            panel1.HorizontalScroll.Maximum = 0;
+            panel1.AutoScroll = true;
             chartSeries.Clear();
+            Color color = ColorSustineri.Blue;
+            if (dataType == TYPE_GAS) color = ColorSustineri.Green;
 
-            List<double> weekGasData = new List<double>();
             timePeriod.Clear();
             timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
-            for (int i = 0; i < timePeriod.Count; i++)
-            {
-                weekGasData.Add(gasData[i]);
-            }
-            string gasChart = "Gas";
             int dropDownWidth = avgChartWidth / 8;
-            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY + avgChartHeight), new Size(dropDownWidth, avgLabelHeight), panel1, gasChart);
+            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY), new Size(dropDownWidth, avgLabelHeight), panel1, dataType);
             ComboBox comboBox = dropDown.CreateDropDown(new string[] { "Dag", "Week", "Maand", "Jaar" }, roundCornerDiameter: textboxRoundness);
             comboBox.SelectedIndex = 1;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
 
-            CreateControls total = new CreateControls(new Point(avgChartPosX, firstChartPosY + avgChartHeight), new Size(dropDownWidth, avgLabelHeight), panel1, gasChart);
-            updatableLabels.Add(total.CreateLabel("Total:", FontSustineri.H1));
+            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY), new Size(500, avgLabelHeight), panel1);
 
-            CreateCharts chart = new CreateCharts(new Point(avgChartPosX, firstChartPosY), new Size(avgChartWidth, avgChartHeight), panel1, gasChart);
-            chart.Design(SeriesChartType.Column, timePeriod, weekGasData, gasChart, ColorSustineri.Green);
+            viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2);
+
+            CreateCharts chart = new CreateCharts(new Point(avgChartPosX, firstChartPosY), new Size(avgChartWidth, avgChartHeight), panel1, dataType);
+            chart.Design(SeriesChartType.Column, timePeriod, data, dataType, color);
             chartSeries.Add(chart.ChartObj.Series[0]);
+            double total = chart.ChartObj.Series[0].Points.Sum(sum => sum.YValues.Sum());
 
-            Refresh(total, $"Total: {weekGasData.Sum()}");
+            CreateControls totalLabel = new CreateControls(new Point(avgChartPosX, firstChartPosY + avgChartHeight), new Size(180, avgLabelHeight), panel1, dataType);
+            updatableLabels.Add(totalLabel.CreateLabel($"Totaal: {total}", FontSustineri.H2, textAlignment: ContentAlignment.MiddleLeft));
 
+            if (hasWaterLimitSetter)
+            {
+                CreateControls limLbl = new CreateControls(new Point(avgChartPosX, totalLabel.ObjPoint.Y + totalLabel.ObjSize.Height * 2), new Size(180, avgLabelHeight), panel1);
+                limLbl.CreateLabel("Water limiet per beurt:", FontSustineri.H3, ContentAlignment.BottomLeft);
+                CreateControls numUpDown = new CreateControls(new Point(limLbl.ObjPoint.X + limLbl.ObjSize.Width, limLbl.ObjPoint.Y), new Size(150, avgLabelHeight), panel1, "waterLimit");
+                numUpDown.CreateNumBox(0, 1000000, roundCornerDiameter: textboxRoundness);
+                CreateControls Llbl = new CreateControls(new Point(numUpDown.ObjPoint.X + numUpDown.ObjSize.Width, limLbl.ObjPoint.Y), new Size(20, avgLabelHeight), panel1);
+                Llbl.CreateLabel("L", FontSustineri.H3, ContentAlignment.BottomLeft);
+                CreateControls confirm = new CreateControls(new Point(Llbl.ObjPoint.X + Llbl.ObjSize.Width, Llbl.ObjPoint.Y), new Size(150, numUpDown.ObjSize.Height), panel1);
+                confirm.CreateButton(SetLimit, "Instellen", FontSustineri.H3, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+            }
+        }
+        private string WeekPicker(int weekOffset = 0)
+        {
+            weekOffset++;
+            var diff = DateTime.Now.DayOfWeek - DayOfWeek.Monday;
+            var date = DateTime.Now.AddDays((-1 * diff) * weekOffset);
+            string weekStart = $"{date.Day}-{date.Month}-{date.Year}";
+            string weekEnd = $"{date.Day + 6}-{date.Month}-{date.Year}";
+
+            return $"{weekStart} - {weekEnd}";
+        }
+
+        private void SetLimit(object sender, EventArgs e)
+        {
+            if (panel1.Controls.Find("waterLimit", true) != null)
+            {
+                Control[] numUD = panel1.Controls.Find("waterLimit", true);
+                waterLimit = (uint)Convert.ToInt32(numUD[0].Text);
+                Console.WriteLine(waterLimit);
+            }
         }
 
         /// <summary>
@@ -379,8 +413,8 @@ namespace Sustineri_Verdieping
             ComboBox comboBox = (ComboBox)sender;
             string total = "Total: ";
             List<double> y = new List<double>();
-            if (comboBox.Name == "Gas") { y = gasData; }
-            else if (comboBox.Name == "Water") { y = waterData; }
+            if (comboBox.Name == TYPE_GAS) { y = gasData; }
+            else if (comboBox.Name == TYPE_WATER) { y = waterData; }
 
             switch (comboBox.SelectedItem.ToString())
             {

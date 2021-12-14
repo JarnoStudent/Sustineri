@@ -104,7 +104,7 @@ namespace Sustineri_Verdieping
                 Parent = ObjParent,
                 Text = text,
                 FlatStyle = FlatStyle.Flat,
-                MaxDropDownItems = 7
+                DropDownHeight = 80
             };
 
             if (items != null) dropdown.Items.AddRange(items);

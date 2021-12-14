@@ -32,22 +32,23 @@ namespace Sustineri_Verdieping
             };
 
             ChartObj.Titles.Add(ObjName);
+            ChartObj.Titles[0].Alignment = ContentAlignment.MiddleLeft;
             ChartObj.Titles[0].Font = FontSustineri.H1;
 
             ChartObj.ChartAreas.Add("Area");
             ChartArea area = ChartObj.ChartAreas[0];
             area.AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
             area.AxisX.Minimum = xMinimum;
+            area.AxisX.MajorGrid.Enabled = false;
+            area.AxisY.MajorGrid.LineColor = Color.Gray;
 
             ChartObj.Series.Add(series);
             Series chartSeries = ChartObj.Series[series];
             chartSeries.ChartType = chartType;
             chartSeries.IsValueShownAsLabel = valueAsLabel;
             chartSeries.Font = FontSustineri.TextFont;
-            chartSeries.BorderWidth = 4;
             if (isPercentage) 
-            { 
-               
+            {                
                 chartSeries.LabelFormat = "{0.0}%";
             }
 
