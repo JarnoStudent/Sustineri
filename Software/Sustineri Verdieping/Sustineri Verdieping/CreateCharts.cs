@@ -32,7 +32,7 @@ namespace Sustineri_Verdieping
             };
 
             ChartObj.Titles.Add(ObjName);
-            ChartObj.Titles[0].Alignment = ContentAlignment.MiddleLeft;
+            ChartObj.Titles[0].Alignment = ContentAlignment.TopLeft;
             ChartObj.Titles[0].Font = FontSustineri.H1;
 
             ChartObj.ChartAreas.Add("Area");

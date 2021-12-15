@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -16,7 +17,9 @@ namespace Sustineri_Verdieping
         List<double> gasData = new List<double>() { 10, 2, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58, 27, 59, 28, 49, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58 };
         List<double> waterData = new List<double>() { 85, 23, 66, 470, 65, 97, 240, 120, 340, 228, 229, 148, 21, 48, 58, 27, 59, 28, 49, 26, 40, 85, 87, 50, 220, 410, 328, 129, 148, 91, 148, 58 };
         //fake data till here
+        List<string> requestDates;
         private uint waterLimit = uint.MaxValue;
+        int dateOffset = 0;
 
         public int screenWidth = 0;
         public int screenHeight = 0;
@@ -39,16 +42,17 @@ namespace Sustineri_Verdieping
         private readonly Bitmap accInfoImage = Properties.Resources.accountInfo;
         private const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
         private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
+        private const string TYPE_WEEK = "Week", TYPE_MONTH = "Maand";
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
         List<Control> registerControls;
+        List<Button> dateChanger;
         PictureBox themeBar;
 
         public Sustineri()
         {
             InitializeComponent();
-            Console.WriteLine("Testing");
             Screen scrActive = Screen.FromControl(this);
             screenWidth = scrActive.Bounds.Width;
             screenHeight = scrActive.Bounds.Height;
@@ -253,7 +257,7 @@ namespace Sustineri_Verdieping
             int logoSizeX = LOGO_DROPLET_X * screenHeight / 1500;
             int logoSizeY = LOGO_DROPLET_Y * screenHeight / 1500;
             int labelCenterX = (panel1.Width - labelWidth) / 2;
-            int maxCharLength = 15;
+            int maxCharLength = 16;
 
             string titleText = "Inloggen";
             string nameText = "Naam";
@@ -304,7 +308,7 @@ namespace Sustineri_Verdieping
                 CreateField("Geboortedatum", labelWidth, ++line);
                 //Birth date picker
                 CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth / 2, title.ObjSize.Height), panel1);
-                birthDate.CreateDatePicker(ColorSustineri.Green, textboxRoundness);
+                birthDate.CreateDatePicker(textboxRoundness);
 
                 extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
             }
@@ -343,6 +347,8 @@ namespace Sustineri_Verdieping
         /// Creates a data page using given data
         /// </summary>
         /// <param name="dataType">Make sure to give each dataType string a unique name</param>
+        /// <param name="data">Required, data displayed on the y axis</param>
+        /// <param name="hasWaterLimitSetter">Use this on water page</param>
         private void DataPage(string dataType, List<double> data, bool hasWaterLimitSetter = false)
         {
             panel1.Controls.Clear();
@@ -355,14 +361,19 @@ namespace Sustineri_Verdieping
             timePeriod.Clear();
             timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
             int dropDownWidth = avgChartWidth / 8;
-            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY), new Size(dropDownWidth, avgLabelHeight), panel1, dataType);
-            ComboBox comboBox = dropDown.CreateDropDown(new string[] { "Dag", "Week", "Maand", "Jaar" }, roundCornerDiameter: textboxRoundness);
-            comboBox.SelectedIndex = 1;
+            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY +avgLabelHeight), new Size(dropDownWidth, avgLabelHeight*2), panel1, dataType);
+            ComboBox comboBox = dropDown.CreateDropDown(new string[] { TYPE_WEEK, TYPE_MONTH }, font: FontSustineri.H2, roundCornerDiameter: textboxRoundness);
+            comboBox.SelectedIndex = 0;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
 
-            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY), new Size(500, avgLabelHeight), panel1);
+            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight*2), panel1);
+            updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2));
 
-            viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2);
+            CreateControls previous = new CreateControls(new Point(viewingDate.ObjPoint.X - avgLabelHeight*2, viewingDate.ObjPoint.Y), new Size(avgLabelHeight*2, avgLabelHeight*2), panel1, TYPE_WEEK);
+            dateChanger = new List<Button>();
+            dateChanger.Add(previous.CreateButton(DateChange, "<", font: FontSustineri.H2, roundCornerDiameter: textboxRoundness));
+            CreateControls next = new CreateControls(new Point(viewingDate.ObjPoint.X + viewingDate.ObjSize.Width, viewingDate.ObjPoint.Y), new Size(avgLabelHeight*2, avgLabelHeight*2), panel1, TYPE_WEEK);
+            dateChanger.Add(next.CreateButton(DateChange, ">", font: FontSustineri.H2, roundCornerDiameter: textboxRoundness));
 
             CreateCharts chart = new CreateCharts(new Point(avgChartPosX, firstChartPosY), new Size(avgChartWidth, avgChartHeight), panel1, dataType);
             chart.Design(SeriesChartType.Column, timePeriod, data, dataType, color);
@@ -384,15 +395,46 @@ namespace Sustineri_Verdieping
                 confirm.CreateButton(SetLimit, "Instellen", FontSustineri.H3, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
             }
         }
+
         private string WeekPicker(int weekOffset = 0)
         {
-            weekOffset++;
+            weekOffset = weekOffset * 7;
             var diff = DateTime.Now.DayOfWeek - DayOfWeek.Monday;
-            var date = DateTime.Now.AddDays((-1 * diff) * weekOffset);
-            string weekStart = $"{date.Day}-{date.Month}-{date.Year}";
-            string weekEnd = $"{date.Day + 6}-{date.Month}-{date.Year}";
+            var date = DateTime.Now.AddDays((-1 * diff) + weekOffset);
 
-            return $"{weekStart} - {weekEnd}";
+            requestDates = new List<string>();
+            for (int i = 0; i < 7; i++) requestDates.Add($"{date.AddDays(i).Day}-{date.AddDays(i).Month}-{date.AddDays(i).Year}");
+
+            string weekStart = $"{date.Day}-{date.Month}-{date.Year}";
+            date = date.AddDays(6);
+            string weekEnd = $"{date.Day}-{date.Month}-{date.Year}";
+
+            return $"{weekStart} / {weekEnd}";
+        }
+
+       /* private string MonthPicker(int monthOffset = 0)
+        {
+            var date = DateTime.Now.AddMonths(monthOffset);
+            requestDates = new List<string>();
+            for (int i = 0; i < DateTime.DaysInMonth(date.Year, date.Month); i++)
+            {
+                string day = "";
+                if (i < 10) day += "0";
+                day += i.ToString();
+                requestDates.Add($"{day}-{date.Month}-{date.Year}");
+            }
+
+            return $"{date.Year}";
+        }*/
+
+        private string YearPicker(int yearOffset = 0)
+        {
+            var date = new DateTime(day: 1, month: 1, year: DateTime.Now.AddYears(yearOffset).Year);
+
+            requestDates = new List<string>();
+            requestDates.Add($"{date.Year}");
+
+            return $"{date.Year}";
         }
 
         private void SetLimit(object sender, EventArgs e)
@@ -411,47 +453,73 @@ namespace Sustineri_Verdieping
         private void DropDownEvents(object sender, EventArgs e)
         {
             ComboBox comboBox = (ComboBox)sender;
-            string total = "Total: ";
-            List<double> y = new List<double>();
-            if (comboBox.Name == TYPE_GAS) { y = gasData; }
-            else if (comboBox.Name == TYPE_WATER) { y = waterData; }
+            dateOffset = 0;
 
             switch (comboBox.SelectedItem.ToString())
             {
-                case "Dag":
-                    for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
-                        {
-                            Refresh(chartSeries[i], y, 24, addToX: ".00");
-                            total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-                        }
+                case TYPE_WEEK:
+                    timePeriod = new List<string>();
+                    timePeriod = Enum.GetNames(typeof(Days)).Cast<string>().ToList();
+                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_WEEK;
+                    UpdateCharts(TYPE_WEEK);
                     break;
 
-                case "Week":
-                    for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
-                        {
-                            Refresh(chartSeries[i], y, Enum.GetNames(typeof(Days)).Cast<string>().ToList());
-                            total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-                        }
-                    break;
+                /* case TYPE_MONTH:
+                     dateActive = MonthPicker(); //starts at current month and updates request list
+                     for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
+                         {
+                             Refresh(chartSeries[i], y, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month), 1);
+                             total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
+                         }
 
-                case "Maand":
-                    for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
-                        {
-                            Refresh(chartSeries[i], y, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month), 1);
-                            total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-                        }
+                     break;*/
 
-                    break;
-
-                case "Jaar":
-                    for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
-                        {
-                            Refresh(chartSeries[i], y, Enum.GetNames(typeof(Months)).Cast<string>().ToList());
-                            total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-                        }
+                case TYPE_MONTH:
+                    timePeriod = new List<string>();
+                    timePeriod = Enum.GetNames(typeof(Months)).Cast<string>().ToList();
+                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_MONTH;
+                    UpdateCharts(TYPE_MONTH);
                     break;
             }
-            for (int i = 0; i < updatableLabels.Count; i++) if (updatableLabels[i].Name == comboBox.Name) Refresh(updatableLabels[i], $"Total: {total}");
+        }
+
+        private void UpdateCharts(string message)
+        {
+            string dateText = "";
+            string total = "";
+            if (message == TYPE_MONTH) dateText = YearPicker(dateOffset);
+            if (message == TYPE_WEEK) dateText = WeekPicker(dateOffset);
+            for (int i = 0; i < chartSeries.Count; i++)
+            {
+                List<double> data = new List<double>();
+                if (chartSeries[i].Name == TYPE_GAS) { data = gasData; }
+                else if (chartSeries[i].Name == TYPE_WATER) { data = waterData; }
+
+                //anti error code, for some reason when item is removed from data it also removes from waterData or gasData
+                List<double> finalData = new List<double>();
+                for (int j = 0; j < timePeriod.Count; j++)
+                {
+                    finalData.Add(data[j]);
+                }
+                //*************************
+
+                Refresh(chartSeries[i], timePeriod, finalData);
+                total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
+            }
+            for (int i = 0; i < updatableLabels.Count; i++)
+            {
+                if (updatableLabels[i].Name == chartSeries[0].Name) Refresh(updatableLabels[i], $"Totaal: {total}");
+                else Refresh(updatableLabels[i], dateText);
+            }
+        }
+
+        private void DateChange(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            if (btn.Text == "<") dateOffset--;
+            else dateOffset++;
+            //Need to update water & gas data here
+            UpdateCharts(btn.Name);
         }
 
         /// <summary>
@@ -460,35 +528,6 @@ namespace Sustineri_Verdieping
         private void Refresh(Series series, List<string> x, List<double> y)
         {
             series.Points.DataBindXY(x, y);
-        }
-        /// <summary>
-        /// Refreshes a chart series using timePeriod list and given y axis list
-        /// </summary>
-        private void Refresh(Series series, List<double> y, int xTimePeriod, int increaseTimeperiodText = 0, string addToX = "")
-        {
-            timePeriod.Clear();
-            List<double> dataForTimePeriod = new List<double>();
-            for (int i = 0; i < xTimePeriod; i++)
-            {
-                timePeriod.Add((i + increaseTimeperiodText).ToString() + addToX);
-                dataForTimePeriod.Add(y[i]);
-            }
-            series.Points.DataBindXY(timePeriod, dataForTimePeriod);
-        }
-        /// <summary>
-        /// Refreshes a chart series using timePeriod list and given y axis list. X axis names are from your given list
-        /// </summary>
-        private void Refresh(Series series, List<double> y, List<string> xTimeNames)
-        {
-            timePeriod.Clear();
-            List<double> dataForTimePeriod = new List<double>();
-            for (int i = 0; i < xTimeNames.Count; i++)
-            {
-                timePeriod.Add(xTimeNames[i]);
-                dataForTimePeriod.Add(y[i]);//failsafe in case Y has more variables
-            }
-            Console.WriteLine($"period: {timePeriod.Count}, Data: {dataForTimePeriod.Count}, y: {y.Count}");
-            series.Points.DataBindXY(timePeriod, dataForTimePeriod);
         }
 
         /// <summary>

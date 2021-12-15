@@ -125,7 +125,7 @@ namespace Sustineri_Verdieping
             return dropdown;
         }
 
-        public DateTimePicker CreateDatePicker(Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
+        public DateTimePicker CreateDatePicker(int roundCornerDiameter = 0, bool border = true)
         {
             DateTimePicker datePicker = new DateTimePicker
             {
