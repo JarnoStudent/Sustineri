@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -30,6 +32,12 @@ namespace Sustineri_Verdieping
         private int firstChartPosY;
         private int avgLabelHeight = 20;
 
+        private const string requestMethodPost = "POST";
+        private const string requestMethodPut = "PUT";
+        private const string requestMethodDelete = "DELETE";
+        private readonly string device_JWT;
+        private string user_JWT;
+
         private readonly Bitmap logoSustineri = Properties.Resources.Cas_sustineri_logo;
         private readonly Bitmap logoDroplet = Properties.Resources.Cas_sustineri_logo_NoWords;
         private readonly Bitmap backgroundImage = Properties.Resources.backgroundImage;
@@ -42,13 +50,19 @@ namespace Sustineri_Verdieping
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
-        List<Control> registerControls;
+        List<Control> UserDataControls;
         PictureBox themeBar;
 
         public Sustineri()
         {
             InitializeComponent();
-            Console.WriteLine("Testing");
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            JobjectCreator jobject = new JobjectCreator { Device_Pass = ".8mP!W9$s*q+S2M+x_V&" };
+            string json_Pass = JsonConvert.SerializeObject(jobject);
+            dynamic responseCode = API.APIRequest("devices/check_winforms.php", requestMethodPost, json_Pass);
+            Console.WriteLine(responseCode.jwt);
+            device_JWT = responseCode.jwt;
+
             Screen scrActive = Screen.FromControl(this);
             screenWidth = scrActive.Bounds.Width;
             screenHeight = scrActive.Bounds.Height;
@@ -85,10 +99,32 @@ namespace Sustineri_Verdieping
         {
             Control ctrl = sender as Control;
             bool valid = true; // set valid to false if something went wrong like unable to create account or unable to login.
+            JobjectCreator jobject = new JobjectCreator();
 
             switch (ctrl.Name)
             {
                 case nameof(BtnClickEvents.Login)://Validation required
+                    //Creating a json object for username and password.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        User_Name = UserDataControls[0].Text,
+                        User_Password = UserDataControls[1].Text
+                    };
+                    string jsonUser = JsonConvert.SerializeObject(jobject);
+                    dynamic responseCode = API.APIRequest("user/get_login.php", requestMethodPost, jsonUser);
+
+                    Console.WriteLine(responseCode);
+
+                    //Set jwt token if login was succesfull.
+                    if (responseCode.Message == "Succesfull login")
+                    {
+                        user_JWT = responseCode.jwt;
+                    }
+                    else
+                    {
+                        valid = false;
+                    }
                     if (valid)
                     {
                         panel1.Controls.Clear(); // put in HomePage() later
@@ -108,6 +144,44 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.MaakGebruiker)://Validation required
+                                                          //Creating a json object for user.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        User_Name = UserDataControls[0].Text,
+                        User_Firstname = UserDataControls[3].Text,
+                        User_Insertion = UserDataControls[4].Text,
+                        User_Lastname = UserDataControls[5].Text,
+                        User_Email = UserDataControls[6].Text,
+                        User_Street = UserDataControls[7].Text,
+                        User_Housenumber = UserDataControls[8].Text,
+                        User_Postalcode = UserDataControls[9].Text,
+                        User_City = UserDataControls[10].Text,
+                        User_Gender = UserDataControls[11].Text,
+                        User_Birthdate = UserDataControls[12].Text
+                    };
+                    string User_PassCheck = UserDataControls[2].Text;
+                    jobject.User_Password = UserDataControls[1].Text;
+                    if (User_PassCheck == jobject.User_Password && jobject.User_Password != "" && User_PassCheck != "")
+                    {
+                        jsonUser = JsonConvert.SerializeObject(jobject);
+                        responseCode = API.APIRequest("user/create_user.php", requestMethodPost, jsonUser);
+                        if (responseCode.Message == "User was succesfully created.")
+                        {
+                            Console.WriteLine(responseCode.Message);
+                        }
+                        else
+                        {
+                            Console.WriteLine(responseCode.Message);
+                            valid = false;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Password isnt the same");
+                        valid = false;
+                    }
+
                     if (valid)
                     {
                         LoginPage();
@@ -259,9 +333,9 @@ namespace Sustineri_Verdieping
             string nameText = "Naam";
             string leftBtnText = nameof(BtnClickEvents.Login);
             string rightBtnText = nameof(BtnClickEvents.Registreren);
+            UserDataControls = new List<Control>();
             if (isRegisterPage)
             {
-                registerControls = new List<Control>();
                 titleText = "Registreren";
                 nameText += $" (max {maxCharLength} karakters)";
                 leftBtnText = nameof(BtnClickEvents.Terug);
@@ -270,41 +344,43 @@ namespace Sustineri_Verdieping
 
             CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.MiddleCenter);
 
-            CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
+            CreateControls username = CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
             CreateControls password = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
             int lastLoginObjectPos = password.ObjPoint.Y;
-
+            UserDataControls.Add(username.Ctrl);
+            UserDataControls.Add(password.Ctrl);
             int extraPageLength = 0;
             if (isRegisterPage)
             {
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
                 // Password confirmation
-                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true).Ctrl); line++;
+                UserDataControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true).Ctrl); line++;
                 // First name
-                registerControls.Add(CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
+                UserDataControls.Add(CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
-                registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
-                registerControls.Add(CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
                 // E-mail
-                registerControls.Add(CreateSingleLineInput("e-mail", labelWidth, ++line).Ctrl); line++;
+                UserDataControls.Add(CreateSingleLineInput("e-mail", labelWidth, ++line).Ctrl); line++;
                 // Street and housenumber
-                registerControls.Add(CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5).Ctrl);
-                registerControls.Add(CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3).Ctrl);
                 // Postal code and city
-                registerControls.Add(CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
-                registerControls.Add(CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
+                UserDataControls.Add(CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
                 // Gender
                 CreateField("Gender", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
                 //Gender dropdown
                 CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(labelWidth / 3, avgLabelHeight), panel1, "Gender");
                 genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Neutraal" }, roundCornerDiameter: textboxRoundness);
-                registerControls.Add(genderDropDown.Ctrl);
+                UserDataControls.Add(genderDropDown.Ctrl);
 
                 CreateField("Geboortedatum", labelWidth, ++line);
                 //Birth date picker
                 CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth / 2, title.ObjSize.Height), panel1);
-                birthDate.CreateDatePicker(ColorSustineri.Green, textboxRoundness);
+                DateTimePicker dateTimePick = birthDate.CreateDatePicker(ColorSustineri.Green, textboxRoundness);
+                UserDataControls.Add(dateTimePick);
 
                 extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
             }
