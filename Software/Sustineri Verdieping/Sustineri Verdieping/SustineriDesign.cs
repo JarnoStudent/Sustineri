@@ -10,8 +10,9 @@ namespace Sustineri_Verdieping
 
     public struct FontSustineri
     {
-        public static Font H1 { get { return new Font("Arial", 14, FontStyle.Bold); } }
-        public static Font H2 { get { return new Font("Arial", 12); } }
+        public static Font H1 { get { return new Font("Arial", 24, FontStyle.Bold); } }
+        public static Font H2 { get { return new Font("Arial", 14, FontStyle.Bold); } }
+        public static Font H3 { get { return new Font("Arial", 12); } }
         public static Font TextFont { get { return new Font("Arial", 10); } }
     }
 

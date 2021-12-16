@@ -24,29 +24,31 @@ namespace Sustineri_Verdieping
 
         public Chart Design(SeriesChartType chartType, List<string> horizontal, List<double> vertical, string series, Color color = new Color(), int xMinimum = 0, bool valueAsLabel = true, bool isPercentage = false)
         {
-            ChartObj = new Chart();
-
-            ChartObj.Location = ObjPoint;
-            ChartObj.Size = ObjSize;
-            ChartObj.Parent = ObjParent;
+            ChartObj = new Chart
+            {
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent
+            };
 
             ChartObj.Titles.Add(ObjName);
+            ChartObj.Titles[0].Alignment = ContentAlignment.MiddleLeft;
             ChartObj.Titles[0].Font = FontSustineri.H1;
 
             ChartObj.ChartAreas.Add("Area");
             ChartArea area = ChartObj.ChartAreas[0];
             area.AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
             area.AxisX.Minimum = xMinimum;
+            area.AxisX.MajorGrid.Enabled = false;
+            area.AxisY.MajorGrid.LineColor = Color.Gray;
 
             ChartObj.Series.Add(series);
             Series chartSeries = ChartObj.Series[series];
             chartSeries.ChartType = chartType;
             chartSeries.IsValueShownAsLabel = valueAsLabel;
             chartSeries.Font = FontSustineri.TextFont;
-            chartSeries.BorderWidth = 4;
             if (isPercentage) 
-            { 
-               
+            {                
                 chartSeries.LabelFormat = "{0.0}%";
             }
 

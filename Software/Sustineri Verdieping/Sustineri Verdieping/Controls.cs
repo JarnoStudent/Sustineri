@@ -8,7 +8,7 @@ namespace Sustineri_Verdieping
     /// With this class you can create a Label, Button, NumericUpDown, TextBox or a PictureBox.
     /// For some Rounded corners are available.    
     /// </summary>
-    public class Controls
+    public abstract class Controls
     {
         public Control Ctrl { get; protected set; }
         protected Control ctrlBorder = null;
@@ -96,31 +96,58 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public ComboBox CreateDropDown(string[] items, string text = "...", Font font = null, Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
         {
-            ComboBox dropdown = new ComboBox();
-            dropdown.Name = ObjName;
-            dropdown.Location = ObjPoint;
-            dropdown.Size = ObjSize;
-            dropdown.Parent = ObjParent;
+            ComboBox dropdown = new ComboBox
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent,
+                Text = text,
+                FlatStyle = FlatStyle.Flat,
+                DropDownHeight = 80
+            };
 
             if (items != null) dropdown.Items.AddRange(items);
 
-            dropdown.Text = text;            
             if (font != null) dropdown.Font = font;
             else dropdown.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             dropdown.BackColor = color;
             if (color != Color.White) dropdown.ForeColor = Color.White;
-            dropdown.FlatStyle = FlatStyle.Flat;
-            dropdown.MaxDropDownItems = 7;
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, dropdown);
             dropdown.BringToFront();
             Ctrl = dropdown;
 
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
             return dropdown;
+        }
+
+        public DateTimePicker CreateDatePicker(Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
+        {
+            DateTimePicker datePicker = new DateTimePicker
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent,
+                Font = FontSustineri.TextFont,
+                Cursor = Cursors.Hand         
+                
+            };
+            datePicker.MaxDate = DateTime.Now.AddDays(1);
+            datePicker.MinimumSize = ObjSize;
+            datePicker.Value = DateTime.Now;
+            Ctrl = datePicker;
+
+            protsize = Ctrl.Size;
+            if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
+            
+
+
+            return datePicker;
         }
 
         /// <summary>
@@ -134,14 +161,16 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public Label CreateLabel(string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundCornerDiameter = 0)
         {
-            Label label = new Label();
-            label.Name = ObjName;
-            label.Location = ObjPoint;
-            label.Size = ObjSize;
-            label.Parent = ObjParent;
+            Label label = new Label
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent,
+                Text = text,
+                TextAlign = textAlignment
+            };
 
-            label.Text = text;
-            label.TextAlign = textAlignment;
             if (font != null) label.Font = font;
             else label.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
@@ -169,24 +198,26 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public Button CreateButton(EventHandler eHandler, string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundCornerDiameter = 0, Bitmap image = null, bool border = false)
         {
-            Button btn = new Button();
-            btn.Name = ObjName;
-            btn.Location = ObjPoint;
-            btn.Size = ObjSize;
-            btn.Parent = ObjParent;
+            Button btn = new Button
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent,
+                Text = text,
+                TextAlign = textAlignment,
+                BackgroundImageLayout = ImageLayout.Zoom,
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat,
+        };
 
-            btn.Text = text;
-            btn.TextAlign = textAlignment;
             if (font != null) btn.Font = font;
             else btn.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             btn.BackColor = color;
             if (color != Color.White || image != null) btn.ForeColor = Color.White;
             if (image != null) btn.BackgroundImage = image;
-            btn.BackgroundImageLayout = ImageLayout.Zoom;
-            btn.Cursor = Cursors.Hand;
 
-            btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.Click += new EventHandler(eHandler);
             btn.BringToFront();
@@ -210,26 +241,27 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public NumericUpDown CreateNumBox(int min, int max, Font font = null, Color color = new Color(), int roundCornerDiameter = 0, bool border = true)
         {
-            NumericUpDown numBox = new NumericUpDown();
-            numBox.Name = ObjName;
-            numBox.Location = ObjPoint;
-            numBox.Size = ObjSize;
-            numBox.Parent = ObjParent;
-
-            numBox.Minimum = min;
-            numBox.Maximum = max;
-            numBox.Value = min;
+            NumericUpDown numBox = new NumericUpDown
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent,
+                Minimum = min,
+                Maximum = max,
+                Value = min,
+                BorderStyle = BorderStyle.FixedSingle
+        };
 
             if (font != null) numBox.Font = font;
             else numBox.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             numBox.BackColor = color;
 
-            numBox.BorderStyle = BorderStyle.FixedSingle;
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, numBox);
             numBox.BringToFront();
             Ctrl = numBox;
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -246,11 +278,13 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public TextBox CreateTextBox(Font font = null, bool isPassword = false, Color color = new Color(), int maxLength = 100, int roundCornerDiameter = 0, bool border = true)
         {
-            TextBox txtBox = new TextBox();
-            txtBox.Name = ObjName;
-            txtBox.Location = ObjPoint;
-            txtBox.Size = ObjSize;
-            txtBox.Parent = ObjParent;
+            TextBox txtBox = new TextBox
+            {
+                Name = ObjName,
+                Location = ObjPoint,
+                Size = ObjSize,
+                Parent = ObjParent
+            };
 
             if (font != null) txtBox.Font = font;
             else txtBox.Font = FontSustineri.TextFont;
@@ -265,7 +299,7 @@ namespace Sustineri_Verdieping
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, txtBox);
             txtBox.BringToFront();
             Ctrl = txtBox;
-            protsize = new Size(Ctrl.Width, Ctrl.Height);
+            protsize = Ctrl.Size;
 
             if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
 
@@ -284,11 +318,13 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public PictureBox CreatePicBox(Bitmap image = null, Color color = new Color(), ImageLayout imgLayout = ImageLayout.Stretch, bool sendToBack = false, int roundCornerDiameter = 0, int bleed = 0)
         {
-            PictureBox picBox = new PictureBox();
-            picBox.Name = ObjName;
-            picBox.Location = new Point(ObjPoint.X - bleed, ObjPoint.Y - bleed);
-            picBox.Size = new Size(ObjSize.Width + bleed * 2, ObjSize.Height + bleed * 2);
-            picBox.Parent = ObjParent;
+            PictureBox picBox = new PictureBox
+            {
+                Name = ObjName,
+                Location = new Point(ObjPoint.X - bleed, ObjPoint.Y - bleed),
+                Size = new Size(ObjSize.Width + bleed * 2, ObjSize.Height + bleed * 2),
+                Parent = ObjParent
+            };
 
             if (color.IsEmpty) color = Color.White;
             picBox.BackColor = color;
