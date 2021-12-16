@@ -11,7 +11,7 @@ namespace Sustineri_Verdieping
 {
     public partial class Sustineri : Form
     {
-
+        #region
         //temp fake data DELETE WHEN DATABASE EXISTS
         List<string> timePeriod = new List<string>();
         List<double> gasData = new List<double>() { 10, 2, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58, 27, 59, 28, 49, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58 };
@@ -49,7 +49,7 @@ namespace Sustineri_Verdieping
         List<Control> registerControls;
         List<Button> dateChanger;
         PictureBox themeBar;
-
+        #endregion
         public Sustineri()
         {
             InitializeComponent();
@@ -112,6 +112,11 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.MaakGebruiker)://Validation required
+                    if (registerControls != null)
+                        for (int i = 0; i < registerControls.Count; i++)
+                            if (!registerControls[i].Name.Contains('*') )
+                                registerControls[i].Text = "Liever niet invullen";
+                    //VALIDATION HERE!!! 
                     if (valid)
                     {
                         LoginPage();
@@ -135,8 +140,8 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.GebruikersInformatie):
-                    valid = false;//remove when page can be created
-                    //UserInfoPage();
+                    //valid = false;//remove when page can be created
+                    UserInfoPage();
                     break;
 
                 case nameof(Pages.Home):
@@ -213,29 +218,37 @@ namespace Sustineri_Verdieping
         }
 
 
-        private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0)
+        private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0, bool fromCenter = true)
         {
             int labelCenterX = (panel1.Width - width) / 2;
+            int posYOrigin = panel1.Height / 2; if (!fromCenter) { posYOrigin = 0; labelCenterX = (screenWidth - avgChartWidth) / 2; }
             labelCenterX += addToXPos;
-            CreateControls label = CreateField(text, width, line, addToXPos: addToXPos);
+            CreateControls label = CreateField(text, width, line, addToXPos: addToXPos, fromCenter: fromCenter);
 
-            CreateControls textBox = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), label.ObjSize, panel1, text);
+            CreateControls textBox = new CreateControls(new Point(labelCenterX, CalculatePosition(++line, posYOrigin)), label.ObjSize, panel1, text);
             textBox.CreateTextBox(isPassword: isPassword, maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
             return textBox;
         }
 
-        private CreateControls CreateField(string text, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0)
+        private CreateControls CreateField(string text, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0, bool fromCenter = true)
         {
             int labelCenterX = (panel1.Width - labelWidth) / 2;
+            int posYOrigin = panel1.Height / 2; if (!fromCenter) { posYOrigin = 0; labelCenterX = (screenWidth - avgChartWidth) / 2; }
+            int addToY = 5; if (font != null && font.Height > addToY) addToY = font.Height;
             labelCenterX += addToXPos;
-            CreateControls label = new CreateControls(new Point(labelCenterX, CalculatePosition(line)), new Size(labelWidth, avgLabelHeight + 5), panel1);
+            CreateControls label = new CreateControls(new Point(labelCenterX, CalculatePosition(line, posYOrigin)), new Size(labelWidth, avgLabelHeight + addToY), panel1);
             label.CreateLabel(text, font, contentAlign);
             return label;
         }
 
-        private int CalculatePosition(int line)
+        /// <summary>
+        /// First line starts in the center of the screen
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        private int CalculatePosition(int line, int baseHeight = 0)
         {
-            int baseHeight = panel1.Height / 2;
+            if (baseHeight == 0) { baseHeight = panel1.Height / 10; }
             int lineOffset = 10;
             return baseHeight + ((avgLabelHeight + lineOffset) * line);
         }
@@ -248,7 +261,7 @@ namespace Sustineri_Verdieping
         {
             panel1.Controls.Clear();
             chartSeries.Clear();
-
+            #region
             int line = 0;
             int lineOffset = 10;
             int baseHeight = panel1.Height / 2;
@@ -260,22 +273,25 @@ namespace Sustineri_Verdieping
             int maxCharLength = 16;
 
             string titleText = "Inloggen";
-            string nameText = "Naam";
+            string nameText = "Gebruikersnaam";//wordt vervangen met email
+            string passText = "Wachtwoord";
             string leftBtnText = nameof(BtnClickEvents.Login);
             string rightBtnText = nameof(BtnClickEvents.Registreren);
+            #endregion
             if (isRegisterPage)
             {
                 registerControls = new List<Control>();
                 titleText = "Registreren";
-                nameText += $" (max {maxCharLength} karakters)";
+                nameText += $" * (max {maxCharLength} karakters)";
+                passText += " *";
                 leftBtnText = nameof(BtnClickEvents.Terug);
                 rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
             }
 
-            CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.MiddleCenter);
+            CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.TopCenter);
 
             CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
-            CreateControls password = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true); line++;
+            CreateControls password = CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true); line++;
             int lastLoginObjectPos = password.ObjPoint.Y;
 
             int extraPageLength = 0;
@@ -284,14 +300,14 @@ namespace Sustineri_Verdieping
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
                 // Password confirmation
-                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen", labelWidth, ++line, isPassword: true).Ctrl); line++;
+                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
                 // First name
                 registerControls.Add(CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
                 registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
                 registerControls.Add(CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
                 // E-mail
-                registerControls.Add(CreateSingleLineInput("e-mail", labelWidth, ++line).Ctrl); line++;
+                registerControls.Add(CreateSingleLineInput("E-mail *", labelWidth, ++line).Ctrl); line++;
                 // Street and housenumber
                 registerControls.Add(CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5).Ctrl);
                 registerControls.Add(CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3).Ctrl);
@@ -302,12 +318,12 @@ namespace Sustineri_Verdieping
                 CreateField("Gender", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
                 //Gender dropdown
                 CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(labelWidth / 3, avgLabelHeight), panel1, "Gender");
-                genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Neutraal" }, roundCornerDiameter: textboxRoundness);
+                genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Anders", "Liever niet invullen" }, roundCornerDiameter: textboxRoundness);
                 registerControls.Add(genderDropDown.Ctrl);
 
                 CreateField("Geboortedatum", labelWidth, ++line);
                 //Birth date picker
-                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line)), new Size(labelWidth / 2, title.ObjSize.Height), panel1);
+                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line, panel1.Height / 2)), new Size(labelWidth / 2, avgLabelHeight), panel1);
                 birthDate.CreateDatePicker(textboxRoundness);
 
                 extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
@@ -361,18 +377,18 @@ namespace Sustineri_Verdieping
             timePeriod.Clear();
             timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
             int dropDownWidth = avgChartWidth / 8;
-            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY +avgLabelHeight), new Size(dropDownWidth, avgLabelHeight*2), panel1, dataType);
+            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY + avgLabelHeight), new Size(dropDownWidth, avgLabelHeight * 2), panel1, dataType);
             ComboBox comboBox = dropDown.CreateDropDown(new string[] { TYPE_WEEK, TYPE_MONTH }, font: FontSustineri.H2, roundCornerDiameter: textboxRoundness);
             comboBox.SelectedIndex = 0;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
 
-            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight*2), panel1);
+            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight * 2), panel1);
             updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2));
 
-            CreateControls previous = new CreateControls(new Point(viewingDate.ObjPoint.X - avgLabelHeight*2, viewingDate.ObjPoint.Y), new Size(avgLabelHeight*2, avgLabelHeight*2), panel1, TYPE_WEEK);
+            CreateControls previous = new CreateControls(new Point(viewingDate.ObjPoint.X - avgLabelHeight * 2, viewingDate.ObjPoint.Y), new Size(avgLabelHeight * 2, avgLabelHeight * 2), panel1, TYPE_WEEK);
             dateChanger = new List<Button>();
             dateChanger.Add(previous.CreateButton(DateChange, "<", font: FontSustineri.H2, roundCornerDiameter: textboxRoundness));
-            CreateControls next = new CreateControls(new Point(viewingDate.ObjPoint.X + viewingDate.ObjSize.Width, viewingDate.ObjPoint.Y), new Size(avgLabelHeight*2, avgLabelHeight*2), panel1, TYPE_WEEK);
+            CreateControls next = new CreateControls(new Point(viewingDate.ObjPoint.X + viewingDate.ObjSize.Width, viewingDate.ObjPoint.Y), new Size(avgLabelHeight * 2, avgLabelHeight * 2), panel1, TYPE_WEEK);
             dateChanger.Add(next.CreateButton(DateChange, ">", font: FontSustineri.H2, roundCornerDiameter: textboxRoundness));
 
             CreateCharts chart = new CreateCharts(new Point(avgChartPosX, firstChartPosY), new Size(avgChartWidth, avgChartHeight), panel1, dataType);
@@ -396,6 +412,22 @@ namespace Sustineri_Verdieping
             }
         }
 
+        List<TextBox> accInfoPageData;
+        private void UserInfoPage()
+        {
+            panel1.Controls.Clear();
+            panel1.HorizontalScroll.Maximum = 0;
+            panel1.AutoScroll = true;
+            accInfoPageData = new List<TextBox>();
+            int labelWidth = 200;
+
+            int line = 0;
+            CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenter: false); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Gebruikersnaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox);
+            accInfoPageData.Add(CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true, fromCenter: false).Ctrl as TextBox);
+
+        }
+
         private string WeekPicker(int weekOffset = 0)
         {
             weekOffset = weekOffset * 7;
@@ -412,20 +444,20 @@ namespace Sustineri_Verdieping
             return $"{weekStart} / {weekEnd}";
         }
 
-       /* private string MonthPicker(int monthOffset = 0)
-        {
-            var date = DateTime.Now.AddMonths(monthOffset);
-            requestDates = new List<string>();
-            for (int i = 0; i < DateTime.DaysInMonth(date.Year, date.Month); i++)
-            {
-                string day = "";
-                if (i < 10) day += "0";
-                day += i.ToString();
-                requestDates.Add($"{day}-{date.Month}-{date.Year}");
-            }
+        /* private string MonthPicker(int monthOffset = 0)
+         {
+             var date = DateTime.Now.AddMonths(monthOffset);
+             requestDates = new List<string>();
+             for (int i = 0; i < DateTime.DaysInMonth(date.Year, date.Month); i++)
+             {
+                 string day = "";
+                 if (i < 10) day += "0";
+                 day += i.ToString();
+                 requestDates.Add($"{day}-{date.Month}-{date.Year}");
+             }
 
-            return $"{date.Year}";
-        }*/
+             return $"{date.Year}";
+         }*/
 
         private string YearPicker(int yearOffset = 0)
         {
@@ -463,7 +495,7 @@ namespace Sustineri_Verdieping
                     for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_WEEK;
                     UpdateCharts(TYPE_WEEK);
                     break;
-
+                #region
                 /* case TYPE_MONTH:
                      dateActive = MonthPicker(); //starts at current month and updates request list
                      for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
@@ -473,6 +505,7 @@ namespace Sustineri_Verdieping
                          }
 
                      break;*/
+                #endregion
 
                 case TYPE_MONTH:
                     timePeriod = new List<string>();
@@ -497,10 +530,7 @@ namespace Sustineri_Verdieping
 
                 //anti error code, for some reason when item is removed from data it also removes from waterData or gasData
                 List<double> finalData = new List<double>();
-                for (int j = 0; j < timePeriod.Count; j++)
-                {
-                    finalData.Add(data[j]);
-                }
+                for (int j = 0; j < timePeriod.Count; j++) finalData.Add(data[j]);
                 //*************************
 
                 Refresh(chartSeries[i], timePeriod, finalData);
@@ -517,7 +547,7 @@ namespace Sustineri_Verdieping
         {
             Button btn = (Button)sender;
             if (btn.Text == "<") dateOffset--;
-            else dateOffset++;
+            else if (dateOffset < 0) dateOffset++;
             //Need to update water & gas data here
             UpdateCharts(btn.Name);
         }
@@ -536,28 +566,6 @@ namespace Sustineri_Verdieping
         private void Refresh(Label label, string newText)
         {
             label.Text = newText;
-        }
-        /// <summary>
-        /// Refreshes a chart series or label
-        /// </summary>
-        private void Refresh(CreateControls label, string newText)
-        {
-            if (label.Ctrl is Label)
-            {
-                Label lbl = label.Ctrl as Label;
-                lbl.Text = newText;
-            }
-        }
-        /// <summary>
-        /// Refreshes a chart series or label
-        /// </summary>
-        private void Refresh(Control label, string newText)
-        {
-            if (label is Label)
-            {
-                Label lbl = label as Label;
-                lbl.Text = newText;
-            }
         }
 
         /// <summary>
