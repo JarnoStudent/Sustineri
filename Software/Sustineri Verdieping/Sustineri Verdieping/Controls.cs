@@ -125,31 +125,6 @@ namespace Sustineri_Verdieping
             return dropdown;
         }
 
-        public DateTimePicker CreateDatePicker(int roundCornerDiameter = 0, bool border = true)
-        {
-            DateTimePicker datePicker = new DateTimePicker
-            {
-                Name = ObjName,
-                Location = ObjPoint,
-                Size = ObjSize,
-                Parent = ObjParent,
-                Font = FontSustineri.TextFont,
-                Cursor = Cursors.Hand         
-                
-            };
-            datePicker.MaxDate = DateTime.Now.AddDays(1);
-            datePicker.MinimumSize = ObjSize;
-            datePicker.Value = DateTime.Now;
-            Ctrl = datePicker;
-
-            protsize = Ctrl.Size;
-            if (border) CreatePicBox(color: ColorSustineri.Blue, sendToBack: true, roundCornerDiameter: roundCornerDiameter, bleed: 1);
-            
-
-
-            return datePicker;
-        }
-
         /// <summary>
         /// Creates a Label.
         /// </summary>

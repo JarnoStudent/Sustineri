@@ -112,10 +112,6 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.MaakGebruiker)://Validation required
-                    if (registerControls != null)
-                        for (int i = 0; i < registerControls.Count; i++)
-                            if (!registerControls[i].Name.Contains('*') )
-                                registerControls[i].Text = "Liever niet invullen";
                     //VALIDATION HERE!!! 
                     if (valid)
                     {
@@ -124,24 +120,20 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.Verversen):
-                    for (int i = 0; i < chartSeries.Count; i++)
-                    {
-                        if (chartSeries[i].Name == nameof(Pages.Gas))
-                        {
-                            //pull data from database into the list here
-                            Refresh(chartSeries[i], timePeriod, gasData);
-                        }
-                        if (chartSeries[i].Name == nameof(Pages.Water))
-                        {
-                            //pull data from database into the list here
-                            Refresh(chartSeries[i], timePeriod, waterData);
-                        }
-                    }
+                    if (dateChanger[0] != null) UpdateCharts(dateChanger[0].Name);
                     break;
 
                 case nameof(BtnClickEvents.GebruikersInformatie):
                     //valid = false;//remove when page can be created
                     UserInfoPage();
+                    break;
+
+                case nameof(BtnClickEvents.AanpassenWachtwoord):
+                    valid = false;
+                    break;
+
+                case nameof(BtnClickEvents.GegevensAanpassen):
+                    valid = false;
                     break;
 
                 case nameof(Pages.Home):
@@ -170,7 +162,7 @@ namespace Sustineri_Verdieping
                         else { menuMainButtons[i].BackColor = ColorSustineri.Blue; themeBar.BackColor = ColorSustineri.Blue; }
                         menuMainButtons[i].ForeColor = Color.White;
                     }
-                    else
+                    else if (menuMainButtons.Contains(ctrl))
                     {
                         menuMainButtons[i].BackColor = Color.White;
                         menuMainButtons[i].ForeColor = Color.Black;
@@ -273,16 +265,16 @@ namespace Sustineri_Verdieping
             int maxCharLength = 16;
 
             string titleText = "Inloggen";
-            string nameText = "Gebruikersnaam";//wordt vervangen met email
+            string nameText = "E-mail";
             string passText = "Wachtwoord";
             string leftBtnText = nameof(BtnClickEvents.Login);
             string rightBtnText = nameof(BtnClickEvents.Registreren);
+            registerControls = new List<Control>();
             #endregion
             if (isRegisterPage)
             {
-                registerControls = new List<Control>();
                 titleText = "Registreren";
-                nameText += $" * (max {maxCharLength} karakters)";
+                nameText += " *";
                 passText += " *";
                 leftBtnText = nameof(BtnClickEvents.Terug);
                 rightBtnText = nameof(BtnClickEvents.MaakGebruiker);
@@ -290,8 +282,9 @@ namespace Sustineri_Verdieping
 
             CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.TopCenter);
 
-            CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength); line++;
+            registerControls.Add(CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength * 2).Ctrl); line++;
             CreateControls password = CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true); line++;
+            registerControls.Add(password.Ctrl);
             int lastLoginObjectPos = password.ObjPoint.Y;
 
             int extraPageLength = 0;
@@ -302,42 +295,26 @@ namespace Sustineri_Verdieping
                 // Password confirmation
                 registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
                 // First name
-                registerControls.Add(CreateSingleLineInput($"Voornaam (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
+                registerControls.Add(CreateSingleLineInput($"Voornaam * (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
                 registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
-                registerControls.Add(CreateSingleLineInput($"Achternaam (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
-                // E-mail
-                registerControls.Add(CreateSingleLineInput("E-mail *", labelWidth, ++line).Ctrl); line++;
-                // Street and housenumber
-                registerControls.Add(CreateSingleLineInput("Straat", labelWidth / 5 * 3, ++line, addToXPos: -labelWidth / 5).Ctrl);
-                registerControls.Add(CreateSingleLineInput("Huisnummer", labelWidth / 3, line++, addToXPos: labelWidth / 3).Ctrl);
-                // Postal code and city
-                registerControls.Add(CreateSingleLineInput("Postcode", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
-                registerControls.Add(CreateSingleLineInput("Stad", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
-                // Gender
-                CreateField("Gender", labelWidth / 3, ++line, addToXPos: -labelWidth / 3);
-                //Gender dropdown
-                CreateControls genderDropDown = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line)), new Size(labelWidth / 3, avgLabelHeight), panel1, "Gender");
-                genderDropDown.CreateDropDown(new string[] { "Man", "Vrouw", "Anders", "Liever niet invullen" }, roundCornerDiameter: textboxRoundness);
-                registerControls.Add(genderDropDown.Ctrl);
-
-                CreateField("Geboortedatum", labelWidth, ++line);
-                //Birth date picker
-                CreateControls birthDate = new CreateControls(new Point(labelCenterX, CalculatePosition(++line, panel1.Height / 2)), new Size(labelWidth / 2, avgLabelHeight), panel1);
-                birthDate.CreateDatePicker(textboxRoundness);
-
-                extraPageLength = birthDate.ObjPoint.Y - lastLoginObjectPos;
+                registerControls.Add(CreateSingleLineInput($"Achternaam * (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
+                extraPageLength = registerControls[registerControls.Count - 1].Location.Y - lastLoginObjectPos;
             }
 
             //buttons
             int btnWidth = labelWidth / 5 * 2;
             CreateControls leftBtn = new CreateControls(new Point(labelCenterX, baseHeight + ((avgLabelHeight + lineOffset) * ++line) + avgLabelHeight), new Size(btnWidth, avgLabelHeight * 2), panel1, leftBtnText);
             leftBtn.CreateButton(PageSwitcher, leftBtnText, color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
-            CreateControls rightButton = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, leftBtn.ObjPoint.Y), new Size(btnWidth, avgLabelHeight * 2), panel1, rightBtnText);
+            CreateControls rightButton = new CreateControls(new Point(labelCenterX + labelWidth - btnWidth, leftBtn.ObjPoint.Y), new Size(btnWidth, avgLabelHeight * 2), panel1, rightBtnText); line += 2;
             rightButton.CreateButton(PageSwitcher, nameof(BtnClickEvents.Registreren), color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
 
+            CreateControls errorMessage = CreateField("", labelWidth, ++line);
+            errorMessage.Ctrl.ForeColor = Color.Red;
+            registerControls.Add(errorMessage.Ctrl);
+
             //visual appearance
-            int fieldHeight = lastLoginObjectPos + rightButton.ObjSize.Height;
+            int fieldHeight = lastLoginObjectPos + rightButton.ObjSize.Height + errorMessage.ObjSize.Height * 2;
 
             CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, title.ObjPoint.Y - lineOffset * 4 - logoSizeY), new Size(logoSizeX, logoSizeY), panel1, "logo");
             logo.CreatePicBox(logoDroplet);
@@ -377,10 +354,15 @@ namespace Sustineri_Verdieping
             timePeriod.Clear();
             timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
             int dropDownWidth = avgChartWidth / 8;
-            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth, firstChartPosY + avgLabelHeight), new Size(dropDownWidth, avgLabelHeight * 2), panel1, dataType);
+
+            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth - avgLabelHeight * 3, firstChartPosY + avgLabelHeight), new Size(dropDownWidth, avgLabelHeight), panel1, dataType);
             ComboBox comboBox = dropDown.CreateDropDown(new string[] { TYPE_WEEK, TYPE_MONTH }, font: FontSustineri.H2, roundCornerDiameter: textboxRoundness);
             comboBox.SelectedIndex = 0;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
+
+            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
+            refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
+
 
             CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight * 2), panel1);
             updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2));
@@ -419,13 +401,26 @@ namespace Sustineri_Verdieping
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
             accInfoPageData = new List<TextBox>();
-            int labelWidth = 200;
+            int labelWidth = 230;
 
             int line = 0;
-            CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenter: false); line++;
-            accInfoPageData.Add(CreateSingleLineInput("Gebruikersnaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox);
-            accInfoPageData.Add(CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true, fromCenter: false).Ctrl as TextBox);
+            var firstObj = CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenter: false).Ctrl; line++;
+            accInfoPageData.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Voornaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
 
+            CreateField("Wachtwoord", labelWidth, ++line, fromCenter: false);
+            CreateControls password = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, accInfoPageData[accInfoPageData.Count - 1].Height), panel1);
+            TextBox pw = password.CreateTextBox(isPassword: true, color: Color.LightGray, roundCornerDiameter: textboxRoundness);
+            pw.Enabled = false;
+            accInfoPageData.Add(pw);
+
+            CreateControls editPassword = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, pw.Height), panel1, nameof(BtnClickEvents.AanpassenWachtwoord));
+            editPassword.CreateButton(PageSwitcher, "Wachtwoord aanpassen", color: Color.White, roundCornerDiameter: textboxRoundness); line++;
+
+            CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
+            editData.CreateButton(PageSwitcher, "Gegevens aanpassen", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
         }
 
         private string WeekPicker(int weekOffset = 0)
@@ -620,7 +615,9 @@ namespace Sustineri_Verdieping
         Terug,
         MaakGebruiker,
         Verversen,
-        GebruikersInformatie
+        GebruikersInformatie,
+        AanpassenWachtwoord,
+        GegevensAanpassen
     }
 
     public enum Months
