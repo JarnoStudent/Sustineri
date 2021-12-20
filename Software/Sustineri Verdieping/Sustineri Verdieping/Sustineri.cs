@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -95,7 +96,8 @@ namespace Sustineri_Verdieping
                 case nameof(BtnClickEvents.Login)://Validation required
                     if (valid)
                     {
-                        panel1.Controls.Clear(); // put in HomePage() later
+                        panel1.Controls.Clear();
+                        HomePage();
                         MenuMain();
                     }
                     break;
@@ -124,21 +126,33 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.GebruikersInformatie):
-                    //valid = false;//remove when page can be created
                     UserInfoPage();
                     break;
 
-                case nameof(BtnClickEvents.AanpassenWachtwoord):
-                    valid = false;
+                case nameof(BtnClickEvents.WachtwoordEditPagina):
+                    PasswordEditPage();
+                    break;
+
+                case nameof(BtnClickEvents.WachtwoordAanpassen):
+                    //validate old password
+                    if (valid)
+                    {
+                        //edit data in database
+                        UserInfoPage();
+                    }
                     break;
 
                 case nameof(BtnClickEvents.GegevensAanpassen):
                     valid = false;
+                    if (valid)
+                    {
+                        //edit data in database
+                    }
                     break;
 
                 case nameof(Pages.Home):
-                    valid = false;//remove when page can be created
-                    //HomePage();
+                    //valid = false;//remove when page can be created
+                    HomePage();
                     break;
 
                 case nameof(Pages.Water):
@@ -209,23 +223,27 @@ namespace Sustineri_Verdieping
             //add HomePage(); later
         }
 
-
-        private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0, bool fromCenter = true)
+        #region
+        private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0, bool fromCenterX = true, bool fromCenterY = true)
         {
             int labelCenterX = (panel1.Width - width) / 2;
-            int posYOrigin = panel1.Height / 2; if (!fromCenter) { posYOrigin = 0; labelCenterX = (screenWidth - avgChartWidth) / 2; }
+            int posYOrigin = panel1.Height / 2;
+            if (!fromCenterX) { labelCenterX = (screenWidth - avgChartWidth) / 2; }
+            if (!fromCenterY) { posYOrigin = 0; }
             labelCenterX += addToXPos;
-            CreateControls label = CreateField(text, width, line, addToXPos: addToXPos, fromCenter: fromCenter);
+            CreateControls label = CreateField(text, width, line, addToXPos: addToXPos, fromCenterX: fromCenterX, fromCenterY: fromCenterY);
 
             CreateControls textBox = new CreateControls(new Point(labelCenterX, CalculatePosition(++line, posYOrigin)), label.ObjSize, panel1, text);
             textBox.CreateTextBox(isPassword: isPassword, maxLength: maxCharLength, roundCornerDiameter: textboxRoundness);
             return textBox;
         }
 
-        private CreateControls CreateField(string text, int labelWidth, int line, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0, bool fromCenter = true)
+        private CreateControls CreateField(string text, int labelWidth, int line = 0, Font font = null, ContentAlignment contentAlign = ContentAlignment.BottomLeft, int addToXPos = 0, bool fromCenterX = true, bool fromCenterY = true)
         {
             int labelCenterX = (panel1.Width - labelWidth) / 2;
-            int posYOrigin = panel1.Height / 2; if (!fromCenter) { posYOrigin = 0; labelCenterX = (screenWidth - avgChartWidth) / 2; }
+            int posYOrigin = panel1.Height / 2;
+            if (!fromCenterX) { labelCenterX = (screenWidth - avgChartWidth) / 2; }
+            if (!fromCenterY) { posYOrigin = 0; }
             int addToY = 5; if (font != null && font.Height > addToY) addToY = font.Height;
             labelCenterX += addToXPos;
             CreateControls label = new CreateControls(new Point(labelCenterX, CalculatePosition(line, posYOrigin)), new Size(labelWidth, avgLabelHeight + addToY), panel1);
@@ -245,6 +263,7 @@ namespace Sustineri_Verdieping
             return baseHeight + ((avgLabelHeight + lineOffset) * line);
         }
 
+        #endregion
 
         /// <summary>
         /// Creates the login page
@@ -281,25 +300,28 @@ namespace Sustineri_Verdieping
             }
 
             CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.TopCenter);
-
             registerControls.Add(CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength * 2).Ctrl); line++;
-            CreateControls password = CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true); line++;
-            registerControls.Add(password.Ctrl);
-            int lastLoginObjectPos = password.ObjPoint.Y;
 
+            int baseBackGroundHeight = registerControls[registerControls.Count - 1].Location.Y;
             int extraPageLength = 0;
             if (isRegisterPage)
             {
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
-                // Password confirmation
-                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
                 // First name
                 registerControls.Add(CreateSingleLineInput($"Voornaam * (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
                 registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
                 registerControls.Add(CreateSingleLineInput($"Achternaam * (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
-                extraPageLength = registerControls[registerControls.Count - 1].Location.Y - lastLoginObjectPos;
+            }
+
+            registerControls.Add(CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true).Ctrl); line++;
+
+            if (isRegisterPage)
+            {
+                // Password confirmation
+                extraPageLength = registerControls[registerControls.Count - 1].Location.Y - baseBackGroundHeight;
+                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
             }
 
             //buttons
@@ -314,7 +336,7 @@ namespace Sustineri_Verdieping
             registerControls.Add(errorMessage.Ctrl);
 
             //visual appearance
-            int fieldHeight = lastLoginObjectPos + rightButton.ObjSize.Height + errorMessage.ObjSize.Height * 2;
+            int fieldHeight = baseBackGroundHeight + rightButton.ObjSize.Height + errorMessage.ObjSize.Height * 2;
 
             CreateControls logo = new CreateControls(new Point((panel1.Width - logoSizeX) / 2, title.ObjPoint.Y - lineOffset * 4 - logoSizeY), new Size(logoSizeX, logoSizeY), panel1, "logo");
             logo.CreatePicBox(logoDroplet);
@@ -322,7 +344,7 @@ namespace Sustineri_Verdieping
             CreateControls colorField = new CreateControls(new Point((panel1.Width - fieldWidth) / 2, (panel1.Height - fieldHeight) / 2), new Size(fieldWidth, fieldHeight + extraPageLength), panel1, "background");
             colorField.CreatePicBox(color: Color.White, sendToBack: true, roundCornerDiameter: standardRoundingDiameter);
 
-            if (panel1.VerticalScroll.Visible)
+            if (panel1.VerticalScroll.Visible || isRegisterPage)
             {
                 CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
                 background.CreatePicBox(backgroundImageToBlack, sendToBack: true);
@@ -334,6 +356,30 @@ namespace Sustineri_Verdieping
                 CreateControls background = new CreateControls(new Point(0, 0), new Size(panel1.Width, panel1.Height), panel1, "background");
                 background.CreatePicBox(backgroundImage, sendToBack: true);
             }
+        }
+
+        private void HomePage()
+        {
+            panel1.Controls.Clear();
+            panel1.HorizontalScroll.Maximum = 0;
+            panel1.AutoScroll = true;
+            chartSeries.Clear();
+            Font font = FontSustineri.TextFont;
+            Color themeColor = ColorSustineri.Blue;
+
+            // KEEP ORDER THE SAME UNLESS YOU WANT TO CHANGE THE ORDER IN THE APP
+            CreateControls footer = new CreateControls(new Point(), new Size(screenWidth, font.Height * 3), panel1);
+            Label footerLabel = footer.CreateLabel("© Sustineri 2021", font, color: themeColor);
+            footerLabel.Dock = DockStyle.Bottom;
+
+            CreateControls link = new CreateControls(new Point(), new Size(screenWidth, font.Height * 3), panel1);
+            Button linkButton = link.CreateButton(ToWebsite, "Ga naar de website", FontSustineri.H2, textColor: themeColor);
+            linkButton.Dock = DockStyle.Bottom;
+
+            CreateControls saved = new CreateControls(new Point(), new Size(screenWidth, screenHeight / 4), panel1);
+            PictureBox savedBg = saved.CreatePicBox(color: themeColor);
+            savedBg.Dock = DockStyle.Bottom;
+
         }
 
         /// <summary>
@@ -401,26 +447,48 @@ namespace Sustineri_Verdieping
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
             accInfoPageData = new List<TextBox>();
-            int labelWidth = 230;
+            int labelWidth = 300;
 
             int line = 0;
-            var firstObj = CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenter: false).Ctrl; line++;
-            accInfoPageData.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
-            accInfoPageData.Add(CreateSingleLineInput("Voornaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
-            accInfoPageData.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
-            accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenter: false).Ctrl as TextBox); line++;
+            var firstObj = CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false).Ctrl; line++;
+            accInfoPageData.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Voornaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
 
-            CreateField("Wachtwoord", labelWidth, ++line, fromCenter: false);
+            CreateField("Wachtwoord", labelWidth, ++line, fromCenterY: false, fromCenterX: false);
             CreateControls password = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, accInfoPageData[accInfoPageData.Count - 1].Height), panel1);
             TextBox pw = password.CreateTextBox(isPassword: true, color: Color.LightGray, roundCornerDiameter: textboxRoundness);
             pw.Enabled = false;
             accInfoPageData.Add(pw);
 
-            CreateControls editPassword = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, pw.Height), panel1, nameof(BtnClickEvents.AanpassenWachtwoord));
+            CreateControls editPassword = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, pw.Height), panel1, nameof(BtnClickEvents.WachtwoordEditPagina));
             editPassword.CreateButton(PageSwitcher, "Wachtwoord aanpassen", color: Color.White, roundCornerDiameter: textboxRoundness); line++;
 
-            CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
-            editData.CreateButton(PageSwitcher, "Gegevens aanpassen", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+            CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth / 3, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
+            editData.CreateButton(PageSwitcher, "Opslaan", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+
+            CreateControls logo = new CreateControls(new Point(screenWidth / 5 * 3, 0), new Size(screenWidth / 6, panel1.Height), panel1);
+            logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
+        }
+
+        private void PasswordEditPage()
+        {
+            panel1.Controls.Clear();
+            panel1.HorizontalScroll.Maximum = 0;
+            panel1.AutoScroll = true;
+            int labelWidth = 250;
+            int line = -6;
+            var firstObj = CreateSingleLineInput("Nieuw wachtwoord", labelWidth, line++); line++;
+            CreateSingleLineInput("Nieuw wachtwoord bevestigen", labelWidth, line++); line++;
+            CreateSingleLineInput("Oud wachtwoord", labelWidth, line++);
+
+            CreateControls accInfoBtn = new CreateControls(new Point(firstObj.ObjPoint.X, CalculatePosition(line, screenHeight / 2)), new Size(labelWidth, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.WachtwoordAanpassen));
+            accInfoBtn.CreateButton(PageSwitcher, "Bevestigen", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+
+            int logoWidth = screenWidth / 2;
+            CreateControls logo = new CreateControls(new Point(screenWidth - logoWidth / 20 * 9, 0), new Size(logoWidth, panel1.Height), panel1);
+            logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
         }
 
         private string WeekPicker(int weekOffset = 0)
@@ -580,6 +648,11 @@ namespace Sustineri_Verdieping
             return percentages;
         }
 
+        private void ToWebsite(object sender, EventArgs e)
+        {
+            Process.Start("https://145.220.75.60");
+        }
+
         /// <summary>
         /// closes the application
         /// </summary>
@@ -616,8 +689,9 @@ namespace Sustineri_Verdieping
         MaakGebruiker,
         Verversen,
         GebruikersInformatie,
-        AanpassenWachtwoord,
-        GegevensAanpassen
+        WachtwoordEditPagina,
+        GegevensAanpassen,
+        WachtwoordAanpassen
     }
 
     public enum Months

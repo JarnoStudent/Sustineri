@@ -134,7 +134,7 @@ namespace Sustineri_Verdieping
         /// <param name="color">Optional, sets background color of this object and if it is not white or empty text color will be white</param>
         /// <param name="roundCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <returns></returns>
-        public Label CreateLabel(string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundCornerDiameter = 0)
+        public Label CreateLabel(string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), Color textColor = new Color(), int roundCornerDiameter = 0)
         {
             Label label = new Label
             {
@@ -150,7 +150,8 @@ namespace Sustineri_Verdieping
             else label.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             label.BackColor = color;
-            if (color != Color.White) label.ForeColor = Color.White;
+            if (color != Color.White && textColor.IsEmpty) label.ForeColor = Color.White;
+            else if (color != Color.White) label.ForeColor = textColor;
 
             if (roundCornerDiameter > 0) RoundCorners(roundCornerDiameter, label);
             label.BringToFront();
@@ -171,7 +172,7 @@ namespace Sustineri_Verdieping
         /// <param name="roundCornerDiameter">Optional, sets diameter of rounded corners</param>
         /// <param name="border">Optional, if true the object will have a border. Standard this parameter is set to false</param>
         /// <returns></returns>
-        public Button CreateButton(EventHandler eHandler, string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), int roundCornerDiameter = 0, Bitmap image = null, bool border = false)
+        public Button CreateButton(EventHandler eHandler, string text = "", Font font = null, ContentAlignment textAlignment = ContentAlignment.MiddleCenter, Color color = new Color(), Color textColor = new Color(), int roundCornerDiameter = 0, Bitmap image = null, bool border = false)
         {
             Button btn = new Button
             {
@@ -190,7 +191,12 @@ namespace Sustineri_Verdieping
             else btn.Font = FontSustineri.TextFont;
             if (color.IsEmpty) color = Color.White;
             btn.BackColor = color;
-            if (color != Color.White || image != null) btn.ForeColor = Color.White;
+            if (textColor.IsEmpty)
+            {
+                if (color != Color.White || image != null) btn.ForeColor = Color.White;
+            }
+            else btn.ForeColor = textColor;
+
             if (image != null) btn.BackgroundImage = image;
 
             btn.FlatAppearance.BorderSize = 0;
