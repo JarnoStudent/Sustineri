@@ -12,14 +12,14 @@ namespace Sustineri_Verdieping
 {
     public partial class Sustineri : Form
     {
-        #region
+        #region region variables
         //temp fake data DELETE WHEN DATABASE EXISTS
         List<string> timePeriod = new List<string>();
         List<double> gasData = new List<double>() { 10, 2, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58, 27, 59, 28, 49, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58 };
         List<double> waterData = new List<double>() { 85, 23, 66, 470, 65, 97, 240, 120, 340, 228, 229, 148, 21, 48, 58, 27, 59, 28, 49, 26, 40, 85, 87, 50, 220, 410, 328, 129, 148, 91, 148, 58 };
         //fake data till here
         List<string> requestDates;
-        private uint waterLimit = uint.MaxValue;
+        private uint waterLimit = 0;
         int dateOffset = 0;
 
         public int screenWidth = 0;
@@ -47,7 +47,7 @@ namespace Sustineri_Verdieping
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
-        List<Control> registerControls;
+        List<Control> userDataControls;
         List<Button> dateChanger;
         PictureBox themeBar;
         #endregion
@@ -223,7 +223,7 @@ namespace Sustineri_Verdieping
             //add HomePage(); later
         }
 
-        #region
+        #region region label + combination of label and textbox methods
         private CreateControls CreateSingleLineInput(string text, int width, int line, int maxCharLength = 100, bool isPassword = false, int addToXPos = 0, bool fromCenterX = true, bool fromCenterY = true)
         {
             int labelCenterX = (panel1.Width - width) / 2;
@@ -265,6 +265,7 @@ namespace Sustineri_Verdieping
 
         #endregion
 
+        #region region Pages
         /// <summary>
         /// Creates the login page
         /// </summary>
@@ -272,7 +273,7 @@ namespace Sustineri_Verdieping
         {
             panel1.Controls.Clear();
             chartSeries.Clear();
-            #region
+            #region region variables
             int line = 0;
             int lineOffset = 10;
             int baseHeight = panel1.Height / 2;
@@ -288,8 +289,8 @@ namespace Sustineri_Verdieping
             string passText = "Wachtwoord";
             string leftBtnText = nameof(BtnClickEvents.Login);
             string rightBtnText = nameof(BtnClickEvents.Registreren);
-            registerControls = new List<Control>();
-            #endregion
+            userDataControls = new List<Control>();
+            #endregion 
             if (isRegisterPage)
             {
                 titleText = "Registreren";
@@ -300,28 +301,28 @@ namespace Sustineri_Verdieping
             }
 
             CreateControls title = CreateField(titleText, labelWidth, line, FontSustineri.H2, ContentAlignment.TopCenter);
-            registerControls.Add(CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength * 2).Ctrl); line++;
+            userDataControls.Add(CreateSingleLineInput(nameText, labelWidth, ++line, maxCharLength * 2).Ctrl); line++;
 
-            int baseBackGroundHeight = registerControls[registerControls.Count - 1].Location.Y;
+            int baseBackGroundHeight = userDataControls[userDataControls.Count - 1].Location.Y;
             int extraPageLength = 0;
             if (isRegisterPage)
             {
                 panel1.HorizontalScroll.Maximum = 0;
                 panel1.AutoScroll = true;
                 // First name
-                registerControls.Add(CreateSingleLineInput($"Voornaam * (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
+                userDataControls.Add(CreateSingleLineInput($"Voornaam * (max {maxCharLength} karakters)", labelWidth, ++line).Ctrl); line++;
                 // Insertion and last name
-                registerControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
-                registerControls.Add(CreateSingleLineInput($"Achternaam * (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
+                userDataControls.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth / 3, ++line, addToXPos: -labelWidth / 3).Ctrl);
+                userDataControls.Add(CreateSingleLineInput($"Achternaam * (max {maxCharLength} karakters)", labelWidth / 5 * 3, line++, addToXPos: labelWidth / 5).Ctrl);
             }
 
-            registerControls.Add(CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true).Ctrl); line++;
+            userDataControls.Add(CreateSingleLineInput(passText, labelWidth, ++line, isPassword: true).Ctrl); line++;
 
             if (isRegisterPage)
             {
                 // Password confirmation
-                extraPageLength = registerControls[registerControls.Count - 1].Location.Y - baseBackGroundHeight;
-                registerControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
+                extraPageLength = userDataControls[userDataControls.Count - 1].Location.Y - baseBackGroundHeight;
+                userDataControls.Add(CreateSingleLineInput("Wachtwoord Bevestigen *", labelWidth, ++line, isPassword: true).Ctrl); line++;
             }
 
             //buttons
@@ -333,7 +334,7 @@ namespace Sustineri_Verdieping
 
             CreateControls errorMessage = CreateField("", labelWidth, ++line);
             errorMessage.Ctrl.ForeColor = Color.Red;
-            registerControls.Add(errorMessage.Ctrl);
+            userDataControls.Add(errorMessage.Ctrl);
 
             //visual appearance
             int fieldHeight = baseBackGroundHeight + rightButton.ObjSize.Height + errorMessage.ObjSize.Height * 2;
@@ -358,28 +359,78 @@ namespace Sustineri_Verdieping
             }
         }
 
+        /// <summary>
+        /// Creates the home page
+        /// </summary>
         private void HomePage()
         {
             panel1.Controls.Clear();
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
             chartSeries.Clear();
-            Font font = FontSustineri.TextFont;
+            Font textFont = FontSustineri.TextFont;
+            Font h2Font = FontSustineri.H2;
+            Font h1Font = FontSustineri.H1;
             Color themeColor = ColorSustineri.Blue;
 
             // KEEP ORDER THE SAME UNLESS YOU WANT TO CHANGE THE ORDER IN THE APP
-            CreateControls footer = new CreateControls(new Point(), new Size(screenWidth, font.Height * 3), panel1);
-            Label footerLabel = footer.CreateLabel("© Sustineri 2021", font, color: themeColor);
+            CreateControls footer = new CreateControls(new Point(), new Size(screenWidth, textFont.Height * 3), panel1);
+            Label footerLabel = footer.CreateLabel("© Sustineri 2021", textFont, color: themeColor);
             footerLabel.Dock = DockStyle.Bottom;
 
-            CreateControls link = new CreateControls(new Point(), new Size(screenWidth, font.Height * 3), panel1);
-            Button linkButton = link.CreateButton(ToWebsite, "Ga naar de website", FontSustineri.H2, textColor: themeColor);
+            CreateControls link = new CreateControls(new Point(), new Size(screenWidth, h2Font.Height * 3), panel1);
+            Button linkButton = link.CreateButton(ToWebsite, "Ga naar de website", h2Font, textColor: themeColor);
             linkButton.Dock = DockStyle.Bottom;
 
             CreateControls saved = new CreateControls(new Point(), new Size(screenWidth, screenHeight / 4), panel1);
             PictureBox savedBg = saved.CreatePicBox(color: themeColor);
             savedBg.Dock = DockStyle.Bottom;
 
+            #region region chart
+            //EDIT TO WHAT IS NEEDED
+            timePeriod.Clear();
+            timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
+            int dropDownWidth = avgChartWidth / 8;
+            string dataType = TYPE_WATER;
+
+            CreateControls dropDown = new CreateControls(new Point(avgChartPosX + avgChartWidth - dropDownWidth - avgLabelHeight * 3, firstChartPosY + avgLabelHeight), new Size(dropDownWidth, avgLabelHeight), panel1, dataType);
+            ComboBox comboBox = dropDown.CreateDropDown(new string[] { TYPE_WATER, TYPE_GAS }, font: h2Font, roundCornerDiameter: textboxRoundness);
+            comboBox.SelectedIndex = 0;
+            comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
+
+            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
+            refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
+
+            //label with date currently viewing
+            CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight * 2), panel1);
+            updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", h2Font));
+
+            //view previous or next date buttons
+            CreateControls previous = new CreateControls(new Point(viewingDate.ObjPoint.X - avgLabelHeight * 2, viewingDate.ObjPoint.Y), new Size(avgLabelHeight * 2, avgLabelHeight * 2), panel1, TYPE_WEEK);
+            dateChanger = new List<Button>();
+            dateChanger.Add(previous.CreateButton(DateChange, "<", font: h2Font, roundCornerDiameter: textboxRoundness));
+            CreateControls next = new CreateControls(new Point(viewingDate.ObjPoint.X + viewingDate.ObjSize.Width, viewingDate.ObjPoint.Y), new Size(avgLabelHeight * 2, avgLabelHeight * 2), panel1, TYPE_WEEK);
+            dateChanger.Add(next.CreateButton(DateChange, ">", font: h2Font, roundCornerDiameter: textboxRoundness));
+
+            CreateCharts chart = new CreateCharts(new Point(avgChartPosX, firstChartPosY), new Size(avgChartWidth, avgChartHeight), panel1, "Verbruik per week");
+            Chart chartObj = chart.Design(SeriesChartType.Column, timePeriod, waterData, dataType, ColorSustineri.Blue);
+            chartSeries.Add(chart.ChartObj.Series[0]);
+            double total = chart.ChartObj.Series[0].Points.Sum(sum => sum.YValues.Sum());
+            #endregion
+
+            CreateControls lbl = new CreateControls(new Point(chartObj.Location.X, panel1.Height), new Size(chartObj.Width, h1Font.Height * 3), panel1);
+            lbl.CreateLabel("Uw gemiddelde vergeleken met Nederlands gemiddelde", h1Font, ContentAlignment.MiddleLeft);
+
+            Size size = new Size(chart.ObjSize.Width / 4, h1Font.Height * 8);
+            int height = lbl.ObjPoint.Y + lbl.ObjSize.Height;
+
+            //add variables with $
+            CreateControls temp = new CreateControls(new Point(chartObj.Location.X, height), size, panel1);
+            temp.CreateLabel("Temp:\n{avgtemp}℃ / 37℃", h1Font);
+            CreateControls water = new CreateControls(new Point(screenWidth / 2 - size.Width / 2, height), size, panel1);
+            water.CreateLabel("Water:\n{avgwater}L / 455L", h1Font);
+            CreateControls gas = new CreateControls(new Point(chartObj.Location.X + chartObj.Width - size.Width, height), size, panel1);
+            gas.CreateLabel("Gas:\n{avggas}M³ / 1.82M³", h1Font);
         }
 
         /// <summary>
@@ -441,26 +492,29 @@ namespace Sustineri_Verdieping
         }
 
         List<TextBox> accInfoPageData;
+        /// <summary>
+        /// Draws the user info page with all the account information
+        /// </summary>
         private void UserInfoPage()
         {
             panel1.Controls.Clear();
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
             accInfoPageData = new List<TextBox>();
+            userDataControls = new List<Control>();
             int labelWidth = 300;
 
             int line = 0;
             var firstObj = CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false).Ctrl; line++;
-            accInfoPageData.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Nieuwe e-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
             accInfoPageData.Add(CreateSingleLineInput("Voornaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
             accInfoPageData.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
-            accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
+            accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line += 4;
 
-            CreateField("Wachtwoord", labelWidth, ++line, fromCenterY: false, fromCenterX: false);
-            CreateControls password = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, accInfoPageData[accInfoPageData.Count - 1].Height), panel1);
-            TextBox pw = password.CreateTextBox(isPassword: true, color: Color.LightGray, roundCornerDiameter: textboxRoundness);
-            pw.Enabled = false;
-            accInfoPageData.Add(pw);
+            CreateField("Logingegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false); line++;
+            userDataControls.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl); line++;
+            Control pw = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true, fromCenterY: false, fromCenterX: false).Ctrl; line++;
+            userDataControls.Add(pw);
 
             CreateControls editPassword = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth, pw.Height), panel1, nameof(BtnClickEvents.WachtwoordEditPagina));
             editPassword.CreateButton(PageSwitcher, "Wachtwoord aanpassen", color: Color.White, roundCornerDiameter: textboxRoundness); line++;
@@ -472,16 +526,24 @@ namespace Sustineri_Verdieping
             logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
         }
 
+        /// <summary>
+        /// Draws the password change page. Password may not be changed in combination with other changes
+        /// </summary>
         private void PasswordEditPage()
         {
             panel1.Controls.Clear();
-            panel1.HorizontalScroll.Maximum = 0;
-            panel1.AutoScroll = true;
+            panel1.AutoScroll = false;
+            userDataControls = new List<Control>();
+            accInfoPageData = new List<TextBox>();
             int labelWidth = 250;
-            int line = -6;
-            var firstObj = CreateSingleLineInput("Nieuw wachtwoord", labelWidth, line++); line++;
-            CreateSingleLineInput("Nieuw wachtwoord bevestigen", labelWidth, line++); line++;
-            CreateSingleLineInput("Oud wachtwoord", labelWidth, line++);
+            int line = -9;
+            CreateField("Nieuw wachtwoord", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleCenter); line += 2;
+            var firstObj = CreateSingleLineInput("Nieuw wachtwoord", labelWidth, line++, isPassword: true); line++;
+            accInfoPageData.Add(firstObj.Ctrl as TextBox);
+            accInfoPageData.Add(CreateSingleLineInput("Nieuw wachtwoord bevestigen", labelWidth, line++, isPassword: true).Ctrl as TextBox); line += 3;
+            CreateField("Logingegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleCenter); line += 2;
+            userDataControls.Add(CreateSingleLineInput("E-mail", labelWidth, line++).Ctrl); line++;
+            userDataControls.Add(CreateSingleLineInput("Oud wachtwoord", labelWidth, line, isPassword: true).Ctrl);
 
             CreateControls accInfoBtn = new CreateControls(new Point(firstObj.ObjPoint.X, CalculatePosition(line, screenHeight / 2)), new Size(labelWidth, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.WachtwoordAanpassen));
             accInfoBtn.CreateButton(PageSwitcher, "Bevestigen", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
@@ -490,10 +552,18 @@ namespace Sustineri_Verdieping
             CreateControls logo = new CreateControls(new Point(screenWidth - logoWidth / 20 * 9, 0), new Size(logoWidth, panel1.Height), panel1);
             logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
         }
+        #endregion
 
+        #region region TimePickers
+
+        /// <summary>
+        /// Picks a week with offset to the current week
+        /// </summary>
+        /// <param name="weekOffset">offset of weeks -1 = previous week, -2 = week before previous week etc.</param>
+        /// <returns></returns>
         private string WeekPicker(int weekOffset = 0)
         {
-            weekOffset = weekOffset * 7;
+            weekOffset *= 7;
             var diff = DateTime.Now.DayOfWeek - DayOfWeek.Monday;
             var date = DateTime.Now.AddDays((-1 * diff) + weekOffset);
 
@@ -506,79 +576,28 @@ namespace Sustineri_Verdieping
 
             return $"{weekStart} / {weekEnd}";
         }
-
-        /* private string MonthPicker(int monthOffset = 0)
-         {
-             var date = DateTime.Now.AddMonths(monthOffset);
-             requestDates = new List<string>();
-             for (int i = 0; i < DateTime.DaysInMonth(date.Year, date.Month); i++)
-             {
-                 string day = "";
-                 if (i < 10) day += "0";
-                 day += i.ToString();
-                 requestDates.Add($"{day}-{date.Month}-{date.Year}");
-             }
-
-             return $"{date.Year}";
-         }*/
-
+               
+        /// <summary>
+        /// Picks a year with the offset to the current year
+        /// </summary>
+        /// <param name="yearOffset"> offset of years -1 = previous year -2 = year before previous year etc.</param>
+        /// <returns></returns>
         private string YearPicker(int yearOffset = 0)
         {
             var date = new DateTime(day: 1, month: 1, year: DateTime.Now.AddYears(yearOffset).Year);
 
             requestDates = new List<string>();
             requestDates.Add($"{date.Year}");
-
+            
             return $"{date.Year}";
         }
+        #endregion
 
-        private void SetLimit(object sender, EventArgs e)
-        {
-            if (panel1.Controls.Find("waterLimit", true) != null)
-            {
-                Control[] numUD = panel1.Controls.Find("waterLimit", true);
-                waterLimit = (uint)Convert.ToInt32(numUD[0].Text);
-                Console.WriteLine(waterLimit);
-            }
-        }
-
+        #region region Update/Refresh
         /// <summary>
-        /// Updates chart based on name of the chart and dropdown to selected data of: Dag, Week, Maand, Jaar
+        /// Updates the chart data depending on the message
         /// </summary>
-        private void DropDownEvents(object sender, EventArgs e)
-        {
-            ComboBox comboBox = (ComboBox)sender;
-            dateOffset = 0;
-
-            switch (comboBox.SelectedItem.ToString())
-            {
-                case TYPE_WEEK:
-                    timePeriod = new List<string>();
-                    timePeriod = Enum.GetNames(typeof(Days)).Cast<string>().ToList();
-                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_WEEK;
-                    UpdateCharts(TYPE_WEEK);
-                    break;
-                #region
-                /* case TYPE_MONTH:
-                     dateActive = MonthPicker(); //starts at current month and updates request list
-                     for (int i = 0; i < chartSeries.Count; i++) if (chartSeries[i].Name == comboBox.Name)
-                         {
-                             Refresh(chartSeries[i], y, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month), 1);
-                             total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-                         }
-
-                     break;*/
-                #endregion
-
-                case TYPE_MONTH:
-                    timePeriod = new List<string>();
-                    timePeriod = Enum.GetNames(typeof(Months)).Cast<string>().ToList();
-                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_MONTH;
-                    UpdateCharts(TYPE_MONTH);
-                    break;
-            }
-        }
-
+        /// <param name="message">use TYPE_WEEK or TYPE_MONTH here</param>
         private void UpdateCharts(string message)
         {
             string dateText = "";
@@ -606,13 +625,37 @@ namespace Sustineri_Verdieping
             }
         }
 
-        private void DateChange(object sender, EventArgs e)
+        /// <summary>
+        /// Updates the chart data depending on the message. The color can also be changed
+        /// </summary>
+        /// <param name="message">use TYPE_WEEK or TYPE_MONTH here</param>
+        /// <param name="color">the color given to the data</param>
+        private void UpdateCharts(string message, Color color)
         {
-            Button btn = (Button)sender;
-            if (btn.Text == "<") dateOffset--;
-            else if (dateOffset < 0) dateOffset++;
-            //Need to update water & gas data here
-            UpdateCharts(btn.Name);
+            string dateText = "";
+            string total = "";
+            if (message == TYPE_MONTH) dateText = YearPicker(dateOffset);
+            if (message == TYPE_WEEK) dateText = WeekPicker(dateOffset);
+            for (int i = 0; i < chartSeries.Count; i++)
+            {
+                List<double> data = new List<double>();
+                if (chartSeries[i].Name == TYPE_GAS) { data = gasData; }
+                else if (chartSeries[i].Name == TYPE_WATER) { data = waterData; }
+
+                //anti error code, for some reason when item is removed from data it also removes from waterData or gasData
+                List<double> finalData = new List<double>();
+                for (int j = 0; j < timePeriod.Count; j++) finalData.Add(data[j]);
+                //*************************
+
+                Refresh(chartSeries[i], timePeriod, finalData);
+                chartSeries[i].Color = color;
+                total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
+            }
+            for (int i = 0; i < updatableLabels.Count; i++)
+            {
+                if (updatableLabels[i].Name == chartSeries[0].Name) Refresh(updatableLabels[i], $"Totaal: {total}");
+                else Refresh(updatableLabels[i], dateText);
+            }
         }
 
         /// <summary>
@@ -630,24 +673,71 @@ namespace Sustineri_Verdieping
         {
             label.Text = newText;
         }
+        #endregion
 
+        #region region Events
         /// <summary>
-        /// Returns the list in percentages
+        /// Sets the value of waterLimit to the user given value
         /// </summary>
-        /// <param name="list">List to be converted</param>
-        /// <returns></returns>
-        private List<double> ConvertToPercentageList(List<double> list)
+        private void SetLimit(object sender, EventArgs e)
         {
-            List<double> percentages = new List<double>();
-            for (int i = 0; i < list.Count; i++)
+            if (panel1.Controls.Find("waterLimit", true) != null)
             {
-                double total = list.Sum();
-                double percentage = Math.Round(list[i] / (total / 100), 1);
-                percentages.Add(percentage);
+                Control[] numUD = panel1.Controls.Find("waterLimit", true);
+                waterLimit = (uint)Convert.ToInt32(numUD[0].Text);
+                Console.WriteLine(waterLimit);
             }
-            return percentages;
         }
 
+        /// <summary>
+        /// Updates chart based on name of the chart and dropdown to selected data of: Dag, Week, Maand, Jaar
+        /// </summary>
+        private void DropDownEvents(object sender, EventArgs e)
+        {
+            ComboBox comboBox = (ComboBox)sender;
+            dateOffset = 0;
+
+            switch (comboBox.SelectedItem.ToString())
+            {
+                case TYPE_WEEK:
+                    timePeriod = new List<string>();
+                    timePeriod = Enum.GetNames(typeof(Days)).Cast<string>().ToList();
+                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_WEEK;
+                    UpdateCharts(TYPE_WEEK);
+                    break;
+
+                case TYPE_MONTH:
+                    timePeriod = new List<string>();
+                    timePeriod = Enum.GetNames(typeof(Months)).Cast<string>().ToList();
+                    for (int i = 0; i < dateChanger.Count; i++) dateChanger[i].Name = TYPE_MONTH;
+                    UpdateCharts(TYPE_MONTH);
+                    break;
+
+                case TYPE_WATER:
+                    chartSeries[0].Name = TYPE_WATER;
+                    UpdateCharts(TYPE_WEEK, ColorSustineri.Blue);
+                    break;
+
+                case TYPE_GAS:
+                    chartSeries[0].Name = TYPE_GAS;
+                    UpdateCharts(TYPE_WEEK, ColorSustineri.Green);
+                    break;
+
+            }
+        }
+
+        private void DateChange(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            if (btn.Text == "<") dateOffset--;
+            else if (dateOffset < 0) dateOffset++;
+            //Need to update water & gas data here
+            UpdateCharts(btn.Name);
+        }
+
+        /// <summary>
+        /// Link to the website of Sustineri
+        /// </summary>
         private void ToWebsite(object sender, EventArgs e)
         {
             Process.Start("https://145.220.75.60");
@@ -668,8 +758,15 @@ namespace Sustineri_Verdieping
         {
             this.WindowState = FormWindowState.Minimized;
         }
-    }
+        #endregion
 
+        /// <summary>
+        /// Returns the list in percentages
+        /// </summary>
+        /// <param name="list">List to be converted</param>
+        /// <returns></returns>
+    }
+    #region region enums
     public enum Pages
     {
         Gas,
@@ -720,4 +817,5 @@ namespace Sustineri_Verdieping
         zaterdag,
         zondag
     }
+    #endregion
 }
