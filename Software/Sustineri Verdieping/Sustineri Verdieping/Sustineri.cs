@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -44,6 +46,14 @@ namespace Sustineri_Verdieping
         private const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
         private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
         private const string TYPE_WEEK = "Week", TYPE_MONTH = "Maand";
+        
+        private const string requestMethodPost = "POST";
+        private const string requestMethodPut = "PUT";
+        private const string requestMethodDelete = "DELETE";
+        private readonly string device_JWT;
+        private string user_JWT;
+        private string userID;
+        
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
@@ -54,6 +64,13 @@ namespace Sustineri_Verdieping
         public Sustineri()
         {
             InitializeComponent();
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            JobjectCreator jobject = new JobjectCreator { Device_Pass = ".8mP!W9$s*q+S2M+x_V&" };
+            string json_Pass = JsonConvert.SerializeObject(jobject);
+            dynamic responseCode = API.APIRequest("devices/check_winforms.php", requestMethodPost, json_Pass);
+            Console.WriteLine(responseCode.jwt);
+            device_JWT = responseCode.jwt;
+
             Screen scrActive = Screen.FromControl(this);
             screenWidth = scrActive.Bounds.Width;
             screenHeight = scrActive.Bounds.Height;
@@ -90,12 +107,32 @@ namespace Sustineri_Verdieping
         {
             Control ctrl = sender as Control;
             bool valid = true; // set valid to false if something went wrong like unable to create account or unable to login.
+            JobjectCreator jobject = new JobjectCreator();
+            string jsonUser;
 
             switch (ctrl.Name)
             {
                 case nameof(BtnClickEvents.Login)://Validation required
+                    //Creating a json object for username and password.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        Email = userDataControls[0].Text,
+                        Password = userDataControls[1].Text
+                    };
+                    jsonUser = JsonConvert.SerializeObject(jobject);
+                    dynamic responseCode = API.APIRequest("user/login_user.php", requestMethodPost, jsonUser);
+
+                    //Set jwt token if login was succesfull.
+                    if (responseCode.Message != "Succesfull login")
+                    {
+                        userDataControls[2].Text = responseCode.Message;
+                        valid = false;
+                    }
                     if (valid)
                     {
+                        user_JWT = responseCode.jwt;
+                        userID = responseCode.ID;
                         panel1.Controls.Clear();
                         HomePage();
                         MenuMain();
@@ -114,7 +151,24 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.MaakGebruiker)://Validation required
-                    //VALIDATION HERE!!! 
+                    //Creating a json object for user.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        Email = userDataControls[0].Text,
+                        Firstname = userDataControls[1].Text,
+                        Insertion = userDataControls[2].Text,
+                        Lastname = userDataControls[3].Text,
+                        Password = userDataControls[4].Text,
+                        Password2 = userDataControls[5].Text
+                    };
+                    jsonUser = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/create_user.php", requestMethodPost, jsonUser);
+                    if (responseCode.Message != "User was succesfully created.")
+                    {
+                        userDataControls[6].Text = responseCode.Message;
+                        valid = false;
+                    }
                     if (valid)
                     {
                         LoginPage();
@@ -127,6 +181,26 @@ namespace Sustineri_Verdieping
 
                 case nameof(BtnClickEvents.GebruikersInformatie):
                     UserInfoPage();
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = user_JWT,
+                        User_ID = userID
+                    };
+
+                    //Converting object to json string.
+                    jsonUser = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/get_user.php", requestMethodPost, jsonUser);
+                    if (responseCode.Message != "Succesfully got user data.")
+                    {
+                        valid = false;
+                    }
+                    if(valid)
+                    {
+                        accInfoPageData[0].Text = responseCode.Email;
+                        accInfoPageData[1].Text = responseCode.Firstname;
+                        accInfoPageData[2].Text = responseCode.Insertion;
+                        accInfoPageData[3].Text = responseCode.Lastname;
+                    }
                     break;
 
                 case nameof(BtnClickEvents.WachtwoordEditPagina):
@@ -134,19 +208,55 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.WachtwoordAanpassen):
-                    //validate old password
+                    //Creating a json object for user.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        User_ID = userID,
+                        New_Password = accInfoPageData[0].Text,
+                        New_Password2 = accInfoPageData[1].Text,
+                        Email = userDataControls[0].Text,
+                        Password = userDataControls[1].Text
+                    };
+                    jsonUser = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/update_password.php", requestMethodPost, jsonUser);
+                    if (responseCode.Message != "Password was succesfully updated.")
+                    {
+                        userDataControls[2].Text = responseCode.Message;
+                        valid = false;
+                    }
                     if (valid)
                     {
-                        //edit data in database
+                        userDataControls[2].ForeColor = Color.Green;
+                        userDataControls[2].Text = responseCode.Message;
                         UserInfoPage();
                     }
                     break;
 
                 case nameof(BtnClickEvents.GegevensAanpassen):
-                    valid = false;
+                    //Creating a json object for user.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        User_ID = userID,
+                        New_Email = accInfoPageData[0].Text,
+                        Firstname = accInfoPageData[1].Text,
+                        Insertion = accInfoPageData[2].Text,
+                        Lastname = accInfoPageData[3].Text,
+                        Email = userDataControls[0].Text,
+                        Password = userDataControls[1].Text
+                    };
+                    jsonUser = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/update_user.php", requestMethodPost, jsonUser);
+                    if (responseCode.Message != "User was succesfully updated.")
+                    {
+                        userDataControls[2].Text = responseCode.Message;
+                        valid = false;
+                    }
                     if (valid)
                     {
-                        //edit data in database
+                        userDataControls[2].ForeColor = Color.Green;
+                        userDataControls[2].Text = responseCode.Message;
                     }
                     break;
 
@@ -522,6 +632,10 @@ namespace Sustineri_Verdieping
             CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth / 3, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
             editData.CreateButton(PageSwitcher, "Opslaan", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
 
+            CreateControls errorMessage = CreateField("", labelWidth, 0);
+            errorMessage.Ctrl.ForeColor = Color.Red;
+            userDataControls.Add(errorMessage.Ctrl);
+
             CreateControls logo = new CreateControls(new Point(screenWidth / 5 * 3, 0), new Size(screenWidth / 6, panel1.Height), panel1);
             logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
         }
@@ -551,6 +665,10 @@ namespace Sustineri_Verdieping
             int logoWidth = screenWidth / 2;
             CreateControls logo = new CreateControls(new Point(screenWidth - logoWidth / 20 * 9, 0), new Size(logoWidth, panel1.Height), panel1);
             logo.CreatePicBox(logoDroplet, imgLayout: ImageLayout.Zoom);
+
+            CreateControls errorMessage = CreateField("", labelWidth, line++ + line++);
+            errorMessage.Ctrl.ForeColor = Color.Red;
+            userDataControls.Add(errorMessage.Ctrl);
         }
         #endregion
 
