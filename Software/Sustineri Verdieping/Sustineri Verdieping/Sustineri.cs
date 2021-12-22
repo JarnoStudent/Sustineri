@@ -17,8 +17,8 @@ namespace Sustineri_Verdieping
         #region region variables
         //temp fake data DELETE WHEN DATABASE EXISTS
         List<string> timePeriod = new List<string>();
-        List<double> gasData = new List<double>() { 10, 2, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58, 27, 59, 28, 49, 6, 40, 5, 7, 50, 20, 40, 28, 29, 48, 1, 48, 58 };
-        List<double> waterData = new List<double>() { 85, 23, 66, 470, 65, 97, 240, 120, 340, 228, 229, 148, 21, 48, 58, 27, 59, 28, 49, 26, 40, 85, 87, 50, 220, 410, 328, 129, 148, 91, 148, 58 };
+        List<double> gasData = new List<double>();
+        List<double> waterData = new List<double>();
         //fake data till here
         List<string> requestDates;
         private uint waterLimit = 0;
@@ -46,13 +46,17 @@ namespace Sustineri_Verdieping
         private const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
         private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
         private const string TYPE_WEEK = "Week", TYPE_MONTH = "Maand";
-        
+
+        private const string sensorID_Water = "1";
+        private const string sensorID_Temprature = "2";
+        private const string sensorID_Gas = "3";
         private const string requestMethodPost = "POST";
         private const string requestMethodPut = "PUT";
         private const string requestMethodDelete = "DELETE";
         private readonly string device_JWT;
         private string user_JWT;
         private string userID;
+        private string sensorType;
         
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
@@ -107,8 +111,9 @@ namespace Sustineri_Verdieping
         {
             Control ctrl = sender as Control;
             bool valid = true; // set valid to false if something went wrong like unable to create account or unable to login.
-            JobjectCreator jobject = new JobjectCreator();
-            string jsonUser;
+            JobjectCreator jobject;
+            string json;
+            dynamic responseCode;
 
             switch (ctrl.Name)
             {
@@ -120,8 +125,8 @@ namespace Sustineri_Verdieping
                         Email = userDataControls[0].Text,
                         Password = userDataControls[1].Text
                     };
-                    jsonUser = JsonConvert.SerializeObject(jobject);
-                    dynamic responseCode = API.APIRequest("user/login_user.php", requestMethodPost, jsonUser);
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/login_user.php", requestMethodPost, json);
 
                     //Set jwt token if login was succesfull.
                     if (responseCode.Message != "Succesfull login")
@@ -162,8 +167,8 @@ namespace Sustineri_Verdieping
                         Password = userDataControls[4].Text,
                         Password2 = userDataControls[5].Text
                     };
-                    jsonUser = JsonConvert.SerializeObject(jobject);
-                    responseCode = API.APIRequest("user/create_user.php", requestMethodPost, jsonUser);
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/create_user.php", requestMethodPost, json);
                     if (responseCode.Message != "User was succesfully created.")
                     {
                         userDataControls[6].Text = responseCode.Message;
@@ -188,8 +193,8 @@ namespace Sustineri_Verdieping
                     };
 
                     //Converting object to json string.
-                    jsonUser = JsonConvert.SerializeObject(jobject);
-                    responseCode = API.APIRequest("user/get_user.php", requestMethodPost, jsonUser);
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/get_user.php", requestMethodPost, json);
                     if (responseCode.Message != "Succesfully got user data.")
                     {
                         valid = false;
@@ -218,8 +223,8 @@ namespace Sustineri_Verdieping
                         Email = userDataControls[0].Text,
                         Password = userDataControls[1].Text
                     };
-                    jsonUser = JsonConvert.SerializeObject(jobject);
-                    responseCode = API.APIRequest("user/update_password.php", requestMethodPost, jsonUser);
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/update_password.php", requestMethodPost, json);
                     if (responseCode.Message != "Password was succesfully updated.")
                     {
                         userDataControls[2].Text = responseCode.Message;
@@ -246,8 +251,8 @@ namespace Sustineri_Verdieping
                         Email = userDataControls[0].Text,
                         Password = userDataControls[1].Text
                     };
-                    jsonUser = JsonConvert.SerializeObject(jobject);
-                    responseCode = API.APIRequest("user/update_user.php", requestMethodPost, jsonUser);
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("user/update_user.php", requestMethodPost, json);
                     if (responseCode.Message != "User was succesfully updated.")
                     {
                         userDataControls[2].Text = responseCode.Message;
@@ -261,7 +266,6 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(Pages.Home):
-                    //valid = false;//remove when page can be created
                     HomePage();
                     break;
 
@@ -474,6 +478,7 @@ namespace Sustineri_Verdieping
         /// </summary>
         private void HomePage()
         {
+            dateOffset = 0;
             panel1.Controls.Clear();
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
@@ -511,6 +516,7 @@ namespace Sustineri_Verdieping
             CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
             refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
 
+            sensorType = dataType;
             //label with date currently viewing
             CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight * 2), panel1);
             updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", h2Font));
@@ -551,6 +557,7 @@ namespace Sustineri_Verdieping
         /// <param name="hasWaterLimitSetter">Use this on water page</param>
         private void DataPage(string dataType, List<double> data, bool hasWaterLimitSetter = false)
         {
+            dateOffset = 0;
             panel1.Controls.Clear();
             panel1.HorizontalScroll.Maximum = 0;
             panel1.AutoScroll = true;
@@ -570,7 +577,7 @@ namespace Sustineri_Verdieping
             CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
             refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
 
-
+            sensorType = dataType;
             CreateControls viewingDate = new CreateControls(new Point(screenWidth / 2 - 200, firstChartPosY + avgLabelHeight), new Size(250, avgLabelHeight * 2), panel1);
             updatableLabels.Add(viewingDate.CreateLabel($"{WeekPicker()}", FontSustineri.H2));
 
@@ -630,9 +637,9 @@ namespace Sustineri_Verdieping
             editPassword.CreateButton(PageSwitcher, "Wachtwoord aanpassen", color: Color.White, roundCornerDiameter: textboxRoundness); line++;
 
             CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth / 3, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
-            editData.CreateButton(PageSwitcher, "Opslaan", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
+            editData.CreateButton(PageSwitcher, "Opslaan", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness); line += 2;
 
-            CreateControls errorMessage = CreateField("", labelWidth, 0);
+            CreateControls errorMessage = CreateField("", labelWidth, line++, fromCenterY:false, fromCenterX:false);
             errorMessage.Ctrl.ForeColor = Color.Red;
             userDataControls.Add(errorMessage.Ctrl);
 
@@ -672,6 +679,101 @@ namespace Sustineri_Verdieping
         }
         #endregion
 
+        #region region Database data
+        /// <summary>
+        /// Gets the user data in week format.
+        /// </summary>
+        private void DataWeek(string sensorID, List<double> dataList)
+        {
+            dataList.Clear();
+            for (int i = 0; i < 7; i++)
+            {
+                //Creating a json object for user.
+                JobjectCreator jobject = new JobjectCreator
+                {
+                    JWT_Token = device_JWT,
+                    User_ID = userID,
+                    Sensor_ID = sensorID,
+                    DateWeek = requestDates[i]
+                };
+
+                string json = JsonConvert.SerializeObject(jobject);
+                dynamic responseCode = API.APIRequest("measurement/get_week.php", requestMethodPost, json);
+                if (responseCode.Message != "Got data succesfully.")
+                {
+                    dataList.Add(0);
+                }
+                else
+                {
+                    dataList.Add(Convert.ToDouble(responseCode.Value));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the user data in month format.
+        /// </summary>
+        private void DataMonth(string sensorID, List<double> dataList)
+        {
+            dataList.Clear();
+            for (int i = 0; i < 12; i++)
+            {
+                int month = i + 1;
+                //Creating a json object for user.
+                JobjectCreator jobject = new JobjectCreator
+                {
+                    JWT_Token = device_JWT,
+                    User_ID = userID,
+                    Sensor_ID = sensorID,
+                    DateMonth = month.ToString(),
+                    DateYear = requestDates[0]
+                };
+
+                string json = JsonConvert.SerializeObject(jobject);
+                dynamic responseCode = API.APIRequest("measurement/get_month.php", requestMethodPost, json);
+                if (responseCode.Message != "Got data succesfully.")
+                {
+                    dataList.Add(0);
+                }
+                else
+                {
+                    dataList.Add(Convert.ToDouble(responseCode.Value));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the user data in year format.
+        /// </summary>
+        private void DataYear(string sensorID, List<double> dataList)
+        {
+            dataList.Clear();
+            for (int i = 0; i < 7; i++)
+            {
+                //Creating a json object for user.
+                JobjectCreator jobject = new JobjectCreator
+                {
+                    JWT_Token = device_JWT,
+                    User_ID = userID,
+                    Sensor_ID = sensorID,
+                    DateYear = requestDates[i]
+                };
+
+                string json = JsonConvert.SerializeObject(jobject);
+                dynamic responseCode = API.APIRequest("measurement/get_week.php", requestMethodPost, json);
+                if (responseCode.Message != "Got data succesfully.")
+                {
+                    dataList.Add(0);
+                }
+                else
+                {
+                    dataList.Add(Convert.ToDouble(responseCode.Value));
+                }
+            }
+        }
+
+        #endregion
+
         #region region TimePickers
 
         /// <summary>
@@ -687,6 +789,15 @@ namespace Sustineri_Verdieping
 
             requestDates = new List<string>();
             for (int i = 0; i < 7; i++) requestDates.Add($"{date.AddDays(i).Day}-{date.AddDays(i).Month}-{date.AddDays(i).Year}");
+
+            if (sensorType == TYPE_WATER)
+            {
+                DataWeek(sensorID_Water, waterData);
+            }
+            else if (sensorType == TYPE_GAS)
+            {
+                DataWeek(sensorID_Gas, gasData);
+            }
 
             string weekStart = $"{date.Day}-{date.Month}-{date.Year}";
             date = date.AddDays(6);
@@ -706,7 +817,16 @@ namespace Sustineri_Verdieping
 
             requestDates = new List<string>();
             requestDates.Add($"{date.Year}");
-            
+
+            if (sensorType == TYPE_WATER)
+            {
+                DataMonth(sensorID_Water, waterData);
+            }
+            else if (sensorType == TYPE_GAS)
+            {
+                DataMonth(sensorID_Gas, gasData);
+            }
+
             return $"{date.Year}";
         }
         #endregion
@@ -833,11 +953,15 @@ namespace Sustineri_Verdieping
 
                 case TYPE_WATER:
                     chartSeries[0].Name = TYPE_WATER;
+                    DataWeek(sensorID_Water, waterData);
+                    sensorType = TYPE_WATER;
                     UpdateCharts(TYPE_WEEK, ColorSustineri.Blue);
                     break;
 
                 case TYPE_GAS:
                     chartSeries[0].Name = TYPE_GAS;
+                    DataWeek(sensorID_Gas, gasData);
+                    sensorType = TYPE_GAS;
                     UpdateCharts(TYPE_WEEK, ColorSustineri.Green);
                     break;
 
@@ -849,7 +973,6 @@ namespace Sustineri_Verdieping
             Button btn = (Button)sender;
             if (btn.Text == "<") dateOffset--;
             else if (dateOffset < 0) dateOffset++;
-            //Need to update water & gas data here
             UpdateCharts(btn.Name);
         }
 
