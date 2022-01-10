@@ -72,7 +72,6 @@ namespace Sustineri_Verdieping
             JobjectCreator jobject = new JobjectCreator { Device_Pass = ".8mP!W9$s*q+S2M+x_V&" };
             string json_Pass = JsonConvert.SerializeObject(jobject);
             dynamic responseCode = API.APIRequest("devices/check_winforms.php", requestMethodPost, json_Pass);
-            Console.WriteLine(responseCode.jwt);
             device_JWT = responseCode.jwt;
 
             Screen scrActive = Screen.FromControl(this);

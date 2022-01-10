@@ -25,6 +25,7 @@ namespace Sustineri_Verdieping
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(databaseURL + inputURL);
             request.ContentType = "application/json";
             request.Method = requestMethod;
+            request.Timeout = 10000;
 
             //Set GetRequestStream to Stream object and write json on stream to be posted on body. Afterwards flush streamwriter.
             try
@@ -34,7 +35,6 @@ namespace Sustineri_Verdieping
                     StreamWriter streamWriter = new StreamWriter(stream);
                     streamWriter.Write(jsonString);
                     streamWriter.Flush();
-
                     try
                     {
                         //Set GetResponse to WebResponse object.
