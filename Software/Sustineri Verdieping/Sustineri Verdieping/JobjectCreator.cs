@@ -5,7 +5,7 @@
     /// </summary>
     class JobjectCreator
     {
-        // Sensor
+        // Sensor variables
         public string Sensor_ID { get; set; }
         public string Value { get; set; }
         public string DateWeek { get; set; }
@@ -13,7 +13,7 @@
         public string DateYear { get; set; }
         public string SetLimit { get; set; }
 
-        // User
+        // User variables
         public string User_ID { get; set; }
         public string Firstname { get; set; }
         public string Insertion { get; set; }
@@ -24,12 +24,10 @@
         public string Password2 { get; set; }
         public string New_Password { get; set; }
         public string New_Password2 { get; set; }
+        public string Delete_Confirmation { get; set; }
 
-        // Token
+        // Token variables
         public string Device_Pass { get; set; }
         public string JWT_Token { get; set; }
-
-        // Delete
-        public string Delete_Confirmation { get; set; }
     }
 }

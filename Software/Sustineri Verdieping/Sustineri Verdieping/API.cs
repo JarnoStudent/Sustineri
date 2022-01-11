@@ -6,12 +6,11 @@ namespace Sustineri_Verdieping
 {
     static class API
     {
-        //Private string for standard database url that is used for every API request.
-        private static readonly string databaseURL = "https://145.220.75.60/sustineri_api/api/";
+        private static readonly string databaseURL = "https://145.220.75.60/sustineri_api/api/"; // General url location of api.
 
         /// <summary>
         /// Method for making a API request.<br></br>
-        /// Needs URL for making certain API request. Example: /user/create_user.php<br></br>
+        /// Needs location of api file for making certain API request. Example: /user/create_user.php<br></br>
         /// Needs the method for making request. Example: POST<br></br>
         /// Needs a json string that works for API.<br></br>
         /// </summary>
@@ -21,13 +20,13 @@ namespace Sustineri_Verdieping
         /// <returns></returns>
         public static dynamic APIRequest(string inputURL, string requestMethod, string jsonString)
         {
-            //Set webrequest with URL to HttpWebRequest object and set contentype and method.
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(databaseURL + inputURL);
             request.ContentType = "application/json";
             request.Method = requestMethod;
             request.Timeout = 10000;
+            request.ServerCertificateValidationCallback = delegate { return true; }; // Allows all ssl certificates.
 
-            //Set GetRequestStream to Stream object and write json on stream to be posted on body. Afterwards flush streamwriter.
+            // Try to make a request using streamwriter and request options made before.
             try
             {
                 using (Stream stream = request.GetRequestStream())
@@ -35,21 +34,17 @@ namespace Sustineri_Verdieping
                     StreamWriter streamWriter = new StreamWriter(stream);
                     streamWriter.Write(jsonString);
                     streamWriter.Flush();
+
+                    // Try to get the request and read the data so it can be stored in a variable and returned.
                     try
                     {
-                        //Set GetResponse to WebResponse object.
                         WebResponse response = request.GetResponse();
 
-                        //Set GetResponseStream to variable Stream.
                         using (Stream datastream = response.GetResponseStream())
                         {
-                            //Create object of streamreader.
                             StreamReader reader = new StreamReader(datastream);
-                            //Set data from reading stream in string json.
                             string json = reader.ReadToEnd();
-                            //Parse json string to dynamic responseJson.
                             dynamic responseJson = JObject.Parse(json);
-                            //Return response where data is Message.
                             return responseJson;
                         }
                     }

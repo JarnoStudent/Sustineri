@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -14,7 +12,7 @@ namespace Sustineri_Verdieping
 {
     public partial class Sustineri : Form
     {
-        #region region variables
+        #region region variable and object declarations
         //temp fake data DELETE WHEN DATABASE EXISTS
         List<string> timePeriod = new List<string>();
         List<double> gasData = new List<double>();
@@ -47,16 +45,17 @@ namespace Sustineri_Verdieping
         private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
         private const string TYPE_WEEK = "Week", TYPE_MONTH = "Maand";
 
+        // variables for API usage.
         private const string sensorID_Water = "1";
         private const string sensorID_Temprature = "2";
         private const string sensorID_Gas = "3";
         private const string requestMethodPost = "POST";
         private const string requestMethodPut = "PUT";
         private const string requestMethodDelete = "DELETE";
-        private readonly string device_JWT;
-        private string user_JWT;
-        private string userID;
-        private string sensorType;
+        private string device_JWT = "";
+        private string user_JWT = "";
+        private string userID = "";
+        private string sensorType = "";
         
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
@@ -65,10 +64,12 @@ namespace Sustineri_Verdieping
         List<Button> dateChanger;
         PictureBox themeBar;
         #endregion
+
         public Sustineri()
         {
             InitializeComponent();
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            
+            // Create json object and use it for api request to get a valid JWT token.
             JobjectCreator jobject = new JobjectCreator { Device_Pass = ".8mP!W9$s*q+S2M+x_V&" };
             string json_Pass = JsonConvert.SerializeObject(jobject);
             dynamic responseCode = API.APIRequest("devices/check_winforms.php", requestMethodPost, json_Pass);
