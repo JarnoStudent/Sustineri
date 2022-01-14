@@ -118,7 +118,7 @@ namespace Sustineri_Verdieping
             switch (ctrl.Name)
             {
                 case nameof(BtnClickEvents.Login)://Validation required
-                    //Creating a json object for username and password.
+                    // Create a json object to send to the API. After that you get a valid JWT token back if information is correct.
                     jobject = new JobjectCreator
                     {
                         JWT_Token = device_JWT,
@@ -128,10 +128,16 @@ namespace Sustineri_Verdieping
                     json = JsonConvert.SerializeObject(jobject);
                     responseCode = API.APIRequest("user/login_user.php", requestMethodPost, json);
 
-                    //Set jwt token if login was succesfull.
                     if (responseCode.Message != "Succesfull login")
                     {
-                        userDataControls[2].Text = responseCode.Message;
+                        if (responseCode.Message == "The operation has timed out")
+                        {
+                            userDataControls[2].Text = "Kan geen connectie maken met Sustineri, probeer het later nog eens.";
+                        }
+                        else
+                        {
+                            userDataControls[2].Text = responseCode.Message;
+                        }
                         valid = false;
                     }
                     if (valid)
@@ -156,7 +162,7 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.MaakGebruiker)://Validation required
-                    //Creating a json object for user.
+                    // Create a json object for user data and send to API to create a user.
                     jobject = new JobjectCreator
                     {
                         JWT_Token = device_JWT,
@@ -169,6 +175,7 @@ namespace Sustineri_Verdieping
                     };
                     json = JsonConvert.SerializeObject(jobject);
                     responseCode = API.APIRequest("user/create_user.php", requestMethodPost, json);
+
                     if (responseCode.Message != "User was succesfully created.")
                     {
                         userDataControls[6].Text = responseCode.Message;
@@ -186,15 +193,15 @@ namespace Sustineri_Verdieping
 
                 case nameof(BtnClickEvents.GebruikersInformatie):
                     UserInfoPage();
+                    // Create a json object for getting user data and send to API to get the information of that user.
                     jobject = new JobjectCreator
                     {
                         JWT_Token = user_JWT,
                         User_ID = userID
                     };
-
-                    //Converting object to json string.
                     json = JsonConvert.SerializeObject(jobject);
                     responseCode = API.APIRequest("user/get_user.php", requestMethodPost, json);
+
                     if (responseCode.Message != "Succesfully got user data.")
                     {
                         valid = false;
@@ -213,7 +220,7 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.WachtwoordAanpassen):
-                    //Creating a json object for user.
+                    // Create a json object for changing password and send to API to change current password.
                     jobject = new JobjectCreator
                     {
                         JWT_Token = device_JWT,
@@ -239,7 +246,7 @@ namespace Sustineri_Verdieping
                     break;
 
                 case nameof(BtnClickEvents.GegevensAanpassen):
-                    //Creating a json object for user.
+                    // Create a json object for changing user data and send to API to change user data.
                     jobject = new JobjectCreator
                     {
                         JWT_Token = device_JWT,
@@ -279,7 +286,7 @@ namespace Sustineri_Verdieping
                     //etc...
             }
 
-            //Recoloring page switcher buttons depending on which one was clicked
+            // Recoloring page switcher buttons depending on which one was clicked
             if (menuMainButtons != null && valid)
                 for (int i = 0; i < menuMainButtons.Count; i++)
                 {
@@ -664,7 +671,7 @@ namespace Sustineri_Verdieping
             accInfoPageData.Add(CreateSingleLineInput("Nieuw wachtwoord bevestigen", labelWidth, line++, isPassword: true).Ctrl as TextBox); line += 3;
             CreateField("Logingegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleCenter); line += 2;
             userDataControls.Add(CreateSingleLineInput("E-mail", labelWidth, line++).Ctrl); line++;
-            userDataControls.Add(CreateSingleLineInput("Oud wachtwoord", labelWidth, line, isPassword: true).Ctrl);
+            userDataControls.Add(CreateSingleLineInput("Huidig wachtwoord", labelWidth, line, isPassword: true).Ctrl);
 
             CreateControls accInfoBtn = new CreateControls(new Point(firstObj.ObjPoint.X, CalculatePosition(line, screenHeight / 2)), new Size(labelWidth, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.WachtwoordAanpassen));
             accInfoBtn.CreateButton(PageSwitcher, "Bevestigen", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness);
@@ -688,7 +695,7 @@ namespace Sustineri_Verdieping
             dataList.Clear();
             for (int i = 0; i < 7; i++)
             {
-                //Creating a json object for user.
+                // Create json object for getting sensor data of that week and send to API to get the data.
                 JobjectCreator jobject = new JobjectCreator
                 {
                     JWT_Token = device_JWT,
@@ -719,7 +726,7 @@ namespace Sustineri_Verdieping
             for (int i = 0; i < 12; i++)
             {
                 int month = i + 1;
-                //Creating a json object for user.
+                // Create json object for getting sensor data of that month and send to API to get the data.
                 JobjectCreator jobject = new JobjectCreator
                 {
                     JWT_Token = device_JWT,
@@ -750,7 +757,7 @@ namespace Sustineri_Verdieping
             dataList.Clear();
             for (int i = 0; i < 7; i++)
             {
-                //Creating a json object for user.
+                // Create json object for getting sensor data of that year and send to API to get the data.
                 JobjectCreator jobject = new JobjectCreator
                 {
                     JWT_Token = device_JWT,

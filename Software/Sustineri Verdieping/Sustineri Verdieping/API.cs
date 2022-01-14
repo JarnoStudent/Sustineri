@@ -23,7 +23,7 @@ namespace Sustineri_Verdieping
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(databaseURL + inputURL);
             request.ContentType = "application/json";
             request.Method = requestMethod;
-            request.Timeout = 10000;
+            request.Timeout = 5000;
             request.ServerCertificateValidationCallback = delegate { return true; }; // Allows all ssl certificates.
 
             // Try to make a request using streamwriter and request options made before.
