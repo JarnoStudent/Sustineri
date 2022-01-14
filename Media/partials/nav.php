@@ -14,12 +14,12 @@
                 </div>
                 <div class="col-6 col-sm-7 col-md-9 col-lg-10 position-relative">
                     <ul class="d-none d-lg-block">
-                        <li id="home_"> <!--<?php if ($url === "" || $url === "index.php") { ?>class="current"<?php } ?>-->
+                        <!--<li id="home_">
                             <div class="border-bottom-nav"></div>
                             <a>
                                 <span>Home</span>
                             </a>
-                        </li>
+                        </li>-->
                         <li id="product_">
                             <div class="border-bottom-nav"></div>
                             <a>
@@ -36,6 +36,12 @@
                             <div class="border-bottom-nav"></div>
                             <a>
                                 <span>FAQ</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="app.php">
+                                <span>App</span>
                             </a>
                         </li>
                     </ul>
@@ -68,6 +74,11 @@
             <li id="faq_m">
                 <a>
                     <span>FAQ</span>
+                </a>
+            </li>
+            <li>
+                <a href="app.php">
+                    <span>App</span>
                 </a>
             </li>
         </ul>

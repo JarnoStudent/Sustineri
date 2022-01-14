@@ -9,3 +9,5 @@
 <script src="assets/js/main.js"></script>
 <script src="assets/js/burger.js"></script>
 <script src="assets/js/login.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

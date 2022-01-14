@@ -53,12 +53,12 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12 col-md-4 mb-4 mb-md-0">
-                        <img src="assets/img/shower.png" class="img-fluid">
+                        <img src="assets/img/opzetstuk.png" class="img-fluid px-5">
                     </div>
                     <div class="col-12 col-md-8">
-                        <h2>Sustineri douchekop</h2>
+                        <h2>Sustineri opzetstuk</h2>
                         <p>
-                            Met deze douchekop kunt u uw water- en gas-verbruik bijhouden in een overzichtelijke app.
+                            Met dit opzetstuk kunt u uw water- en gas-verbruik bijhouden in een overzichtelijke app.
                             <br>
                             Zo wordt u bewust van uw gebuik en kunt u het klimaat helpen door minder of kouder te douchen.
                             <br>
@@ -96,9 +96,6 @@
                                 <br>
                                 Cas Heynen
                             </p>
-                            <!--<a class="btn btn-primary" href="/about.php">
-                                Lees meer
-                            </a>-->
                         </div>
                     </div>
                 </div>
@@ -113,7 +110,7 @@
                         <p>
                             <strong>Kan dit in mijn bestaande douche worden ingebouwd?</strong>
                             <br>
-                            De douche kan grotendeels blijven. Er is alleen een nieuwe douchekop nodig.
+                            Dit hoeft nergens te worden ingebouwd. Er hoeft alleen een opzetstuk aan de kraan gedraaid worden.
                         </p>
                         <p>
                             <strong>Moet ik mijn telefoon bij me hebben als ik douche?</strong>

@@ -6166,16 +6166,16 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/assets/img" />
     <property name="settings.editor.selected.configurable" value="preferences.general" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\xampp\htdocs\sustineri\assets\js" />
+      <recent name="C:\xampp\htdocs\sustineri\assets\img" />
+      <recent name="C:\xampp\htdocs\sustineri\partials_app" />
+      <recent name="C:\xampp\htdocs\sustineri\assets\vid" />
+      <recent name="C:\xampp\htdocs\sustineri\partials_app\default" />
       <recent name="C:\xampp\htdocs\sustineri" />
-      <recent name="C:\laragon\www\sustineri\assets\img" />
-      <recent name="C:\laragon\www\sustineri\sass" />
-      <recent name="C:\laragon\www\sustineri" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\laragon\www\sustineri\dist" />
@@ -6218,7 +6218,36 @@
       <workItem from="1637741535189" duration="2004000" />
       <workItem from="1637744110350" duration="1922000" />
       <workItem from="1637746036206" duration="161000" />
-      <workItem from="1637746520563" duration="992000" />
+      <workItem from="1637746520563" duration="4205000" />
+      <workItem from="1637827338440" duration="4566000" />
+      <workItem from="1637865948796" duration="18000" />
+      <workItem from="1637866203112" duration="2671000" />
+      <workItem from="1637871372902" duration="3000" />
+      <workItem from="1637914818896" duration="6032000" />
+      <workItem from="1638189634456" duration="657000" />
+      <workItem from="1638261448932" duration="3263000" />
+      <workItem from="1638345614770" duration="8867000" />
+      <workItem from="1638442476398" duration="2579000" />
+      <workItem from="1638536003841" duration="640000" />
+      <workItem from="1638784698304" duration="1239000" />
+      <workItem from="1638812301348" duration="1497000" />
+      <workItem from="1638885147865" duration="608000" />
+      <workItem from="1638957260380" duration="2644000" />
+      <workItem from="1639044497643" duration="2606000" />
+      <workItem from="1639124283717" duration="3025000" />
+      <workItem from="1639385936063" duration="5834000" />
+      <workItem from="1639473847560" duration="2428000" />
+      <workItem from="1639555489651" duration="5431000" />
+      <workItem from="1639641533573" duration="10199000" />
+      <workItem from="1639727465733" duration="3410000" />
+      <workItem from="1639985764754" duration="15652000" />
+      <workItem from="1640073983889" duration="16175000" />
+      <workItem from="1640160106167" duration="14232000" />
+      <workItem from="1641800473207" duration="15752000" />
+      <workItem from="1641887813509" duration="10648000" />
+      <workItem from="1641974349568" duration="3849000" />
+      <workItem from="1642060633236" duration="9072000" />
+      <workItem from="1642147276934" duration="3993000" />
     </task>
     <servers />
   </component>
@@ -6226,23 +6255,30 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="726" y="323" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1635929339832">
+    <state x="726" y="323" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1640175240997">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="726" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1635929339832" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1637746900512">
+    <state x="726" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1640175240997" />
+    <state x="726" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1639562877522" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1639145688864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="-1180" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1637660742053" />
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1637746900512" />
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1637846061990" />
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1639145688864" />
+    <state x="794" y="443" key="NewPhpFileDialog" timestamp="1638273671953">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="794" y="443" key="NewPhpFileDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1638273671953" />
     <state x="461" y="162" key="SettingsEditor" timestamp="1637746552739">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="162" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1637746552739" />
-    <state x="656" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1637746520398">
+    <state x="656" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1642147330973">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="656" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637746520398" />
+    <state x="656" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1642147330973" />
+    <state x="656" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1639555489710" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1637746161024">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

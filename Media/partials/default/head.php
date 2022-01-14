@@ -17,4 +17,4 @@
 
     $self = $_SERVER["PHP_SELF"];
 ?>
-<title>Sustineri <?php if ($url === "" || $url === "index.php") { ?>| Home<?php } ?></title>
+<title>Sustineri <?php if ($url === "" || $url === "index.php") { ?>| Home<?php } elseif ($url === "login.php") { ?>| Login <?php } elseif ($url === "register.php") { ?>| Registreren <?php } ?></title>

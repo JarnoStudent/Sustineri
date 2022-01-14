@@ -24,29 +24,34 @@ header {
 
   .container {
     height: 100%;
+    //text-align: right;
 
     .row {
       height: 100%;
+      margin: 0;
 
       .col-12 {
         height: 100%;
-        //padding: 0;
+        padding: 0;
 
         .content {
-          max-width: 60%;
-          background-color: rgba(255,255,255,0.7);
-          box-shadow: 0 0 1rem rgba(0,0,0,0.1);
-          backdrop-filter: blur(.8rem);
+          max-width: 70%;
+          //background-color: rgba(255,255,255,0.7);
+          //box-shadow: 0 0 1rem rgba(0,0,0,0.1);
+          //backdrop-filter: blur(.8rem);
           border-radius: .8rem;
           position: absolute;
-          top: 50%;
-          -webkit-transform: translateY(-50%);
+          top: 72%;
+          /*-webkit-transform: translateY(-50%);
           -ms-transform: translateY(-50%);
           -moz-transform: translateY(-50%);
           -o-transform: translateY(-50%);
-          transform: translateY(-50%);
-          padding: 2rem;
+          transform: translateY(-50%);*/
+          //right: 0;
+          //padding: 2rem;
           z-index: 10;
+          color: $color-white;
+          text-shadow: 0 0 2.5rem rgba(6,142,200,0.9);
         }
 
       }
@@ -69,7 +74,8 @@ header {
 
           .content {
             max-width: 100%;
-            position: relative;
+            //position: relative;
+            top: 55%;
           }
 
         }

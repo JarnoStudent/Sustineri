@@ -35,11 +35,11 @@
             <div class="col-12 col-md-4 col-menu">
                 <div class="v-align">
                     <ul>
-                        <li>
+                        <!--<li>
                             <span id="home_footer">
                                 Home
                             </span>
-                        </li>
+                        </li>-->
                         <li>
                             <span id="product_footer">
                                 Product

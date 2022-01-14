@@ -46,7 +46,7 @@ nav {
         text-align: center;
         display: inline-block;
         float: left;
-        line-height: 4.9rem;
+        line-height: 5.6rem;
         position: relative;
         cursor: pointer;
 
@@ -73,11 +73,18 @@ nav {
           height: 100%;
           text-decoration: none;
           //font-family: $font-heading;
+          font-size: 1.05rem;
           color: $color-dark;
           //font-weight: bold;
           position: absolute;
           top: 0;
           left: 0;
+          transition: .3s;
+
+          &:hover {
+            color: $color-blue;
+          }
+
         }
 
       }
