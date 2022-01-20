@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -41,6 +41,8 @@ namespace Sustineri_Verdieping
         private readonly Bitmap refreshImage = Properties.Resources.refresh;
         private readonly Bitmap logoutImage = Properties.Resources.signout;
         private readonly Bitmap accInfoImage = Properties.Resources.accountInfo;
+        private readonly Bitmap polarBearImage = Properties.Resources.polar_bear;
+        private readonly Bitmap treeImage = Properties.Resources.tree;
         private const int LOGO_SUSTINERI_X = 450 / 4 * 3, LOGO_SUSTINERI_Y = 126 / 4 * 3, LOGO_DROPLET_X = 235 / 4 * 3, LOGO_DROPLET_Y = 368 / 4 * 3; //DO NOT CHANGE VALUES
         private const string TYPE_GAS = "  Gasverbruik", TYPE_WATER = "  Waterverbruik";
         private const string TYPE_WEEK = "Week", TYPE_MONTH = "Maand";
@@ -52,17 +54,18 @@ namespace Sustineri_Verdieping
         private const string requestMethodPost = "POST";
         private const string requestMethodPut = "PUT";
         private const string requestMethodDelete = "DELETE";
-        private string device_JWT = "";
-        private string user_JWT = "";
-        private string userID = "";
-        private string sensorType = "";
-        
+        private readonly string device_JWT;
+        private string user_JWT;
+        private string userID;
+        private string sensorType;
+
         List<Series> chartSeries = new List<Series>();
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
         List<Control> userDataControls;
         List<Button> dateChanger;
         PictureBox themeBar;
+
         #endregion
 
         public Sustineri()
@@ -206,7 +209,7 @@ namespace Sustineri_Verdieping
                     {
                         valid = false;
                     }
-                    if(valid)
+                    if (valid)
                     {
                         accInfoPageData[0].Text = responseCode.Email;
                         accInfoPageData[1].Text = responseCode.Firstname;
@@ -504,9 +507,19 @@ namespace Sustineri_Verdieping
             Button linkButton = link.CreateButton(ToWebsite, "Ga naar de website", h2Font, textColor: themeColor);
             linkButton.Dock = DockStyle.Bottom;
 
-            CreateControls saved = new CreateControls(new Point(), new Size(screenWidth, screenHeight / 4), panel1);
+            CreateControls saved = new CreateControls(new Point(), new Size(screenWidth, screenHeight / 3), panel1);
             PictureBox savedBg = saved.CreatePicBox(color: themeColor);
             savedBg.Dock = DockStyle.Bottom;
+            CreateControls effect = new CreateControls(new Point(), new Size(savedBg.Width, savedBg.Height / 3), savedBg);
+            Label effectLbl = effect.CreateLabel("Wat heeft dit voor effect?", FontSustineri.H2, color: savedBg.BackColor);
+            effectLbl.Dock = DockStyle.Top;
+
+            Size imgSize = new Size(savedBg.Size.Width / 3, savedBg.Size.Height / 2);
+            
+            CreateControls bear = new CreateControls(new Point(imgSize.Width / 2, imgSize.Height / 2), imgSize, savedBg);
+            PictureBox bearSaved = bear.CreatePicBox(image: polarBearImage, color: savedBg.BackColor, imgLayout: ImageLayout.Zoom);
+            CreateControls tree = new CreateControls(new Point(savedBg.Size.Width - imgSize.Width / 2 * 3, imgSize.Height / 2), imgSize, savedBg);
+            PictureBox treesSaved = tree.CreatePicBox(image: treeImage, color: savedBg.BackColor, imgLayout: ImageLayout.Zoom);
 
             #region region chart
             //EDIT TO WHAT IS NEEDED
@@ -520,7 +533,7 @@ namespace Sustineri_Verdieping
             comboBox.SelectedIndex = 0;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
 
-            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
+            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1, nameof(BtnClickEvents.Verversen));
             refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
 
             sensorType = dataType;
@@ -548,12 +561,12 @@ namespace Sustineri_Verdieping
             int height = lbl.ObjPoint.Y + lbl.ObjSize.Height;
 
             //add variables with $
-            CreateControls temp = new CreateControls(new Point(chartObj.Location.X, height), size, panel1);
-            temp.CreateLabel("Temp:\n{avgtemp}℃ / 37℃", h1Font);
-            CreateControls water = new CreateControls(new Point(screenWidth / 2 - size.Width / 2, height), size, panel1);
-            water.CreateLabel("Water:\n{avgwater}L / 455L", h1Font);
-            CreateControls gas = new CreateControls(new Point(chartObj.Location.X + chartObj.Width - size.Width, height), size, panel1);
-            gas.CreateLabel("Gas:\n{avggas}M³ / 1.82M³", h1Font);
+            CreateControls temp = new CreateControls(new Point(chartObj.Location.X, height), size, panel1, sensorID_Temprature);
+            updatableLabels.Add(temp.CreateLabel("Temp:\n{avgtemp}℃ / 37℃", h1Font));
+            CreateControls water = new CreateControls(new Point(screenWidth / 2 - size.Width / 2, height), size, panel1, sensorID_Water);
+            updatableLabels.Add(water.CreateLabel($"Water:\n{waterData.Sum()}L / 455L", h1Font));
+            CreateControls gas = new CreateControls(new Point(chartObj.Location.X + chartObj.Width - size.Width, height), size, panel1, sensorID_Gas);
+            updatableLabels.Add(gas.CreateLabel($"Gas:\n{gasData.Sum()}dM³ / 1820dM³", h1Font));
         }
 
         /// <summary>
@@ -581,7 +594,7 @@ namespace Sustineri_Verdieping
             comboBox.SelectedIndex = 0;
             comboBox.SelectedIndexChanged += new EventHandler(DropDownEvents);
 
-            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1);
+            CreateControls refresh = new CreateControls(new Point(avgChartPosX + avgChartWidth - avgLabelHeight * 2, firstChartPosY + avgLabelHeight), new Size(dropDown.ObjSize.Height, dropDown.ObjSize.Height), panel1, nameof(BtnClickEvents.Verversen));
             refresh.CreateButton(PageSwitcher, roundCornerDiameter: textboxRoundness, image: refreshImage);
 
             sensorType = dataType;
@@ -629,13 +642,13 @@ namespace Sustineri_Verdieping
             int labelWidth = 300;
 
             int line = 0;
-            var firstObj = CreateField("Accountgegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false).Ctrl; line++;
+            var firstObj = CreateField("Account gegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false).Ctrl; line++;
             accInfoPageData.Add(CreateSingleLineInput("Nieuwe e-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
             accInfoPageData.Add(CreateSingleLineInput("Voornaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
             accInfoPageData.Add(CreateSingleLineInput("Tussenvoegsel", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line++;
             accInfoPageData.Add(CreateSingleLineInput("Achternaam", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl as TextBox); line += 4;
 
-            CreateField("Logingegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false); line++;
+            CreateField("Login gegevens", labelWidth * 2, line++, FontSustineri.H1, ContentAlignment.MiddleLeft, fromCenterY: false, fromCenterX: false); line++;
             userDataControls.Add(CreateSingleLineInput("E-mail", labelWidth, ++line, fromCenterY: false, fromCenterX: false).Ctrl); line++;
             Control pw = CreateSingleLineInput("Wachtwoord", labelWidth, ++line, isPassword: true, fromCenterY: false, fromCenterX: false).Ctrl; line++;
             userDataControls.Add(pw);
@@ -646,7 +659,7 @@ namespace Sustineri_Verdieping
             CreateControls editData = new CreateControls(new Point(firstObj.Location.X, CalculatePosition(++line, firstObj.Location.Y)), new Size(labelWidth / 3, avgLabelHeight * 2), panel1, nameof(BtnClickEvents.GegevensAanpassen));
             editData.CreateButton(PageSwitcher, "Opslaan", color: ColorSustineri.Blue, roundCornerDiameter: textboxRoundness); line += 2;
 
-            CreateControls errorMessage = CreateField("", labelWidth, line++, fromCenterY:false, fromCenterX:false);
+            CreateControls errorMessage = CreateField("", labelWidth, line++, fromCenterY: false, fromCenterX: false);
             errorMessage.Ctrl.ForeColor = Color.Red;
             userDataControls.Add(errorMessage.Ctrl);
 
@@ -812,7 +825,7 @@ namespace Sustineri_Verdieping
 
             return $"{weekStart} / {weekEnd}";
         }
-               
+
         /// <summary>
         /// Picks a year with the offset to the current year
         /// </summary>
@@ -847,13 +860,14 @@ namespace Sustineri_Verdieping
         {
             string dateText = "";
             string total = "";
+            string dataType = "";
             if (message == TYPE_MONTH) dateText = YearPicker(dateOffset);
             if (message == TYPE_WEEK) dateText = WeekPicker(dateOffset);
             for (int i = 0; i < chartSeries.Count; i++)
             {
                 List<double> data = new List<double>();
-                if (chartSeries[i].Name == TYPE_GAS) { data = gasData; }
-                else if (chartSeries[i].Name == TYPE_WATER) { data = waterData; }
+                if (chartSeries[i].Name == TYPE_GAS) { data = gasData; dataType = "L"; }
+                else if (chartSeries[i].Name == TYPE_WATER) { data = waterData; dataType = "dM³"; }
 
                 //anti error code, for some reason when item is removed from data it also removes from waterData or gasData
                 List<double> finalData = new List<double>();
@@ -865,8 +879,25 @@ namespace Sustineri_Verdieping
             }
             for (int i = 0; i < updatableLabels.Count; i++)
             {
-                if (updatableLabels[i].Name == chartSeries[0].Name) Refresh(updatableLabels[i], $"Totaal: {total}");
-                else Refresh(updatableLabels[i], dateText);
+                switch (updatableLabels[i].Name)
+                {
+                    case sensorID_Temprature:
+                        //Refresh(updatableLabels[i],"Temp:\n{avgtemp}℃ / 37℃");
+                        break;
+
+                    case sensorID_Water:
+                        Refresh(updatableLabels[i], $"Water:\n{waterData.Sum()}L / 455L");
+                        break;
+
+                    case sensorID_Gas:
+                        Refresh(updatableLabels[i], $"Gas:\n{gasData.Sum()}dM³ / 1820dM³");
+                        break;
+
+                    default:
+                        if (updatableLabels[i].Name == chartSeries[0].Name) Refresh(updatableLabels[i], $"Totaal: {total}{dataType}");
+                        else Refresh(updatableLabels[i], dateText);
+                        break;
+                }
             }
         }
 
@@ -877,30 +908,9 @@ namespace Sustineri_Verdieping
         /// <param name="color">the color given to the data</param>
         private void UpdateCharts(string message, Color color)
         {
-            string dateText = "";
-            string total = "";
-            if (message == TYPE_MONTH) dateText = YearPicker(dateOffset);
-            if (message == TYPE_WEEK) dateText = WeekPicker(dateOffset);
-            for (int i = 0; i < chartSeries.Count; i++)
-            {
-                List<double> data = new List<double>();
-                if (chartSeries[i].Name == TYPE_GAS) { data = gasData; }
-                else if (chartSeries[i].Name == TYPE_WATER) { data = waterData; }
+            UpdateCharts(message);
 
-                //anti error code, for some reason when item is removed from data it also removes from waterData or gasData
-                List<double> finalData = new List<double>();
-                for (int j = 0; j < timePeriod.Count; j++) finalData.Add(data[j]);
-                //*************************
-
-                Refresh(chartSeries[i], timePeriod, finalData);
-                chartSeries[i].Color = color;
-                total += chartSeries[i].Points.Sum(total => total.YValues.Sum()).ToString();
-            }
-            for (int i = 0; i < updatableLabels.Count; i++)
-            {
-                if (updatableLabels[i].Name == chartSeries[0].Name) Refresh(updatableLabels[i], $"Totaal: {total}");
-                else Refresh(updatableLabels[i], dateText);
-            }
+            for (int i = 0; i < chartSeries.Count; i++) chartSeries[i].Color = color;
         }
 
         /// <summary>
@@ -1014,6 +1024,7 @@ namespace Sustineri_Verdieping
         /// <param name="list">List to be converted</param>
         /// <returns></returns>
     }
+
     #region region enums
     public enum Pages
     {
