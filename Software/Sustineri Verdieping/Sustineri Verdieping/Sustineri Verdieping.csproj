@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{70333535-F053-4C17-A04B-F3FA79BDAE26}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Sustineri_Verdieping</RootNamespace>
     <AssemblyName>Sustineri Verdieping</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -113,6 +113,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\accountInfo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\polar_bear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tree.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

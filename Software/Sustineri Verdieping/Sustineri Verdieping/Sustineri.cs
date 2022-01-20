@@ -17,6 +17,8 @@ namespace Sustineri_Verdieping
         List<string> timePeriod = new List<string>();
         List<double> gasData = new List<double>();
         List<double> waterData = new List<double>();
+        List<double> tempData = new List<double>();
+
         //fake data till here
         List<string> requestDates;
         private uint waterLimit = 0;
@@ -63,6 +65,7 @@ namespace Sustineri_Verdieping
         List<Label> updatableLabels = new List<Label>();
         List<Button> menuMainButtons;
         List<Control> userDataControls;
+        List<NumericUpDown> limitWater;
         List<Button> dateChanger;
         PictureBox themeBar;
 
@@ -281,6 +284,18 @@ namespace Sustineri_Verdieping
 
                 case nameof(Pages.Water):
                     DataPage(TYPE_WATER, waterData, true);
+
+                    // Create a json object to send to the API. After that you get a valid JWT token back if information is correct.
+                    jobject = new JobjectCreator
+                    {
+                        JWT_Token = device_JWT,
+                        User_ID = userID,
+                        Sensor_ID = sensorID_Water
+                    };
+                    json = JsonConvert.SerializeObject(jobject);
+                    responseCode = API.APIRequest("set_limit/get_limit.php", requestMethodPost, json);
+
+                    limitWater[0].Value = Convert.ToInt32(responseCode.Limit);
                     break;
 
                 case nameof(Pages.Gas):
@@ -562,7 +577,7 @@ namespace Sustineri_Verdieping
 
             //add variables with $
             CreateControls temp = new CreateControls(new Point(chartObj.Location.X, height), size, panel1, sensorID_Temprature);
-            updatableLabels.Add(temp.CreateLabel("Temp:\n{avgtemp}℃ / 37℃", h1Font));
+            updatableLabels.Add(temp.CreateLabel($"Temp:\n{Math.Round(tempData.Sum() / tempData.Count())}℃ / 37℃", h1Font));
             CreateControls water = new CreateControls(new Point(screenWidth / 2 - size.Width / 2, height), size, panel1, sensorID_Water);
             updatableLabels.Add(water.CreateLabel($"Water:\n{waterData.Sum()}L / 455L", h1Font));
             CreateControls gas = new CreateControls(new Point(chartObj.Location.X + chartObj.Width - size.Width, height), size, panel1, sensorID_Gas);
@@ -617,10 +632,11 @@ namespace Sustineri_Verdieping
 
             if (hasWaterLimitSetter)
             {
+                limitWater = new List<NumericUpDown>();
                 CreateControls limLbl = new CreateControls(new Point(avgChartPosX, totalLabel.ObjPoint.Y + totalLabel.ObjSize.Height * 2), new Size(180, avgLabelHeight), panel1);
                 limLbl.CreateLabel("Water limiet per beurt:", FontSustineri.H3, ContentAlignment.BottomLeft);
                 CreateControls numUpDown = new CreateControls(new Point(limLbl.ObjPoint.X + limLbl.ObjSize.Width, limLbl.ObjPoint.Y), new Size(150, avgLabelHeight), panel1, "waterLimit");
-                numUpDown.CreateNumBox(0, 1000000, roundCornerDiameter: textboxRoundness);
+                limitWater.Add(numUpDown.CreateNumBox(0, 1000000, roundCornerDiameter: textboxRoundness));
                 CreateControls Llbl = new CreateControls(new Point(numUpDown.ObjPoint.X + numUpDown.ObjSize.Width, limLbl.ObjPoint.Y), new Size(20, avgLabelHeight), panel1);
                 Llbl.CreateLabel("L", FontSustineri.H3, ContentAlignment.BottomLeft);
                 CreateControls confirm = new CreateControls(new Point(Llbl.ObjPoint.X + Llbl.ObjSize.Width, Llbl.ObjPoint.Y), new Size(150, numUpDown.ObjSize.Height), panel1);
@@ -810,14 +826,9 @@ namespace Sustineri_Verdieping
             requestDates = new List<string>();
             for (int i = 0; i < 7; i++) requestDates.Add($"{date.AddDays(i).Day}-{date.AddDays(i).Month}-{date.AddDays(i).Year}");
 
-            if (sensorType == TYPE_WATER)
-            {
-                DataWeek(sensorID_Water, waterData);
-            }
-            else if (sensorType == TYPE_GAS)
-            {
-                DataWeek(sensorID_Gas, gasData);
-            }
+            DataWeek(sensorID_Water, waterData);
+            DataWeek(sensorID_Gas, gasData);
+            DataWeek(sensorID_Temprature, tempData);
 
             string weekStart = $"{date.Day}-{date.Month}-{date.Year}";
             date = date.AddDays(6);
@@ -940,7 +951,18 @@ namespace Sustineri_Verdieping
             {
                 Control[] numUD = panel1.Controls.Find("waterLimit", true);
                 waterLimit = (uint)Convert.ToInt32(numUD[0].Text);
-                Console.WriteLine(waterLimit);
+
+                // Create a json object to send to the API. After that you get a valid JWT token back if information is correct.
+                JobjectCreator jobject = new JobjectCreator
+                {
+                    JWT_Token = device_JWT,
+                    User_ID = userID,
+                    Sensor_ID = sensorID_Water,
+                    SetLimit = limitWater[0].Value.ToString()
+                };
+                string json = JsonConvert.SerializeObject(jobject);
+                dynamic responseCode = API.APIRequest("set_limit/create_limit.php", requestMethodPost, json);
+                Console.WriteLine(responseCode);
             }
         }
 
