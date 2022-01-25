@@ -13,16 +13,20 @@ namespace Sustineri_Verdieping
     public partial class Sustineri : Form
     {
         #region region variable and object declarations
-        //temp fake data DELETE WHEN DATABASE EXISTS
+        //data lists
         List<string> timePeriod = new List<string>();
         List<double> gasData = new List<double>();
         List<double> waterData = new List<double>();
         List<double> tempData = new List<double>();
 
-        //fake data till here
         List<string> requestDates;
         private uint waterLimit = 0;
         int dateOffset = 0;
+
+        //avg daily Netherlands
+        int avgWaterDay = 455 / 7;
+        int avgGasDay = 1820 / 7;
+        int avgTemp = 37;
 
         public int screenWidth = 0;
         public int screenHeight = 0;
@@ -74,7 +78,7 @@ namespace Sustineri_Verdieping
         public Sustineri()
         {
             InitializeComponent();
-            
+
             // Create json object and use it for api request to get a valid JWT token.
             JobjectCreator jobject = new JobjectCreator { Device_Pass = ".8mP!W9$s*q+S2M+x_V&" };
             string json_Pass = JsonConvert.SerializeObject(jobject);
@@ -530,7 +534,7 @@ namespace Sustineri_Verdieping
             effectLbl.Dock = DockStyle.Top;
 
             Size imgSize = new Size(savedBg.Size.Width / 3, savedBg.Size.Height / 2);
-            
+
             CreateControls bear = new CreateControls(new Point(imgSize.Width / 2, imgSize.Height / 2), imgSize, savedBg);
             PictureBox bearSaved = bear.CreatePicBox(image: polarBearImage, color: savedBg.BackColor, imgLayout: ImageLayout.Zoom);
             CreateControls tree = new CreateControls(new Point(savedBg.Size.Width - imgSize.Width / 2 * 3, imgSize.Height / 2), imgSize, savedBg);
@@ -570,18 +574,18 @@ namespace Sustineri_Verdieping
             #endregion
 
             CreateControls lbl = new CreateControls(new Point(chartObj.Location.X, panel1.Height), new Size(chartObj.Width, h1Font.Height * 3), panel1);
-            lbl.CreateLabel("Uw gemiddelde vergeleken met Nederlands gemiddelde", h1Font, ContentAlignment.MiddleLeft);
+            lbl.CreateLabel("Uw gemiddelde vergeleken met Nederlands gemiddelde (per dag)", h1Font, ContentAlignment.MiddleLeft);
 
             Size size = new Size(chart.ObjSize.Width / 4, h1Font.Height * 8);
             int height = lbl.ObjPoint.Y + lbl.ObjSize.Height;
 
-            //add variables with $
+            //AverageDataPerWeek
             CreateControls temp = new CreateControls(new Point(chartObj.Location.X, height), size, panel1, sensorID_Temprature);
-            updatableLabels.Add(temp.CreateLabel($"Temp:\n{Math.Round(tempData.Sum() / tempData.Count())}℃ / 37℃", h1Font));
+            updatableLabels.Add(temp.CreateLabel($"Temperatuur:\n{GetAvgPerDayOf(tempData)}℃ / {avgTemp}℃", h1Font));
             CreateControls water = new CreateControls(new Point(screenWidth / 2 - size.Width / 2, height), size, panel1, sensorID_Water);
-            updatableLabels.Add(water.CreateLabel($"Water:\n{waterData.Sum()}L / 455L", h1Font));
+            updatableLabels.Add(water.CreateLabel($"Water:\n{GetAvgPerDayOf(waterData)}L / {avgWaterDay}L", h1Font));
             CreateControls gas = new CreateControls(new Point(chartObj.Location.X + chartObj.Width - size.Width, height), size, panel1, sensorID_Gas);
-            updatableLabels.Add(gas.CreateLabel($"Gas:\n{gasData.Sum()}dM³ / 1820dM³", h1Font));
+            updatableLabels.Add(gas.CreateLabel($"Gas:\n{GetAvgPerDayOf(gasData)}dM³ / {avgGasDay}dM³", h1Font));
         }
 
         /// <summary>
@@ -598,7 +602,8 @@ namespace Sustineri_Verdieping
             panel1.AutoScroll = true;
             chartSeries.Clear();
             Color color = ColorSustineri.Blue;
-            if (dataType == TYPE_GAS) color = ColorSustineri.Green;
+            string totalType = "L";
+            if (dataType == TYPE_GAS) { color = ColorSustineri.Green; totalType = "dM³"; }
 
             timePeriod.Clear();
             timePeriod.AddRange(Enum.GetNames(typeof(Days)).Cast<string>().ToList());
@@ -628,7 +633,7 @@ namespace Sustineri_Verdieping
             double total = chart.ChartObj.Series[0].Points.Sum(sum => sum.YValues.Sum());
 
             CreateControls totalLabel = new CreateControls(new Point(avgChartPosX, firstChartPosY + avgChartHeight), new Size(180, avgLabelHeight), panel1, dataType);
-            updatableLabels.Add(totalLabel.CreateLabel($"Totaal: {total}", FontSustineri.H2, textAlignment: ContentAlignment.MiddleLeft));
+            updatableLabels.Add(totalLabel.CreateLabel($"Totaal: {total}{totalType}", FontSustineri.H2, textAlignment: ContentAlignment.MiddleLeft));
 
             if (hasWaterLimitSetter)
             {
@@ -893,15 +898,15 @@ namespace Sustineri_Verdieping
                 switch (updatableLabels[i].Name)
                 {
                     case sensorID_Temprature:
-                        //Refresh(updatableLabels[i],"Temp:\n{avgtemp}℃ / 37℃");
+                        Refresh(updatableLabels[i], $"Temperatuur:\n{GetAvgPerDayOf(tempData)}℃ / {avgTemp}℃");
                         break;
 
                     case sensorID_Water:
-                        Refresh(updatableLabels[i], $"Water:\n{waterData.Sum()}L / 455L");
+                        Refresh(updatableLabels[i], $"Water:\n{GetAvgPerDayOf(waterData)}L / {avgWaterDay}L");
                         break;
 
                     case sensorID_Gas:
-                        Refresh(updatableLabels[i], $"Gas:\n{gasData.Sum()}dM³ / 1820dM³");
+                        Refresh(updatableLabels[i], $"Gas:\n{GetAvgPerDayOf(gasData)}dM³ / {avgGasDay}dM³");
                         break;
 
                     default:
@@ -1040,11 +1045,23 @@ namespace Sustineri_Verdieping
         }
         #endregion
 
-        /// <summary>
-        /// Returns the list in percentages
-        /// </summary>
-        /// <param name="list">List to be converted</param>
-        /// <returns></returns>
+        #region region Calculation
+        private double GetAvgPerDayOf(List<double> data)
+        {
+            double avg = 0;
+            int count = 0;
+            for (int i = 0; i < data.Count(); i++)
+            {
+                if (data[i] > 0)
+                {
+                    avg += data[i];
+                    count++;
+                }
+            }
+
+            return Math.Round(avg / count);
+        }
+        #endregion
     }
 
     #region region enums
